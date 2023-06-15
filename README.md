@@ -1,5 +1,7 @@
 # gasdetection-web
-
+````
+气体检测管理员web前端
+````
 ## Project setup
 ```
 npm install
