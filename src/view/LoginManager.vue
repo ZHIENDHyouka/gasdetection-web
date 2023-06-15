@@ -98,6 +98,7 @@ export default {
       this.clearLoginForm();
     },
     login(loginForm) {
+      this.$router.replace('/home')
       this.$refs[loginForm].validate((valid) => {
         if (valid) {
           login(this.loginForm).then(res => {
