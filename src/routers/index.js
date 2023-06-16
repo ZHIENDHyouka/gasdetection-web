@@ -2,6 +2,8 @@ import Vue from 'vue'
 import VueRouter from 'vue-router'
 import LoginManager from "@/view/LoginManager";
 import ManageHome from "@/view/ManageHome"
+import GasData from "@/view/GasData"
+import GasCharts from "@/view/GasCharts";
 
 Vue.use(VueRouter)
 const routes = [
@@ -9,12 +11,24 @@ const routes = [
         path: '/',
         name: 'login',
         component: LoginManager,
-        hidden:true
+        hidden: true
     },
     {
         path: '/home',
         name: 'ManageHome',
         component: ManageHome,
+        children: [
+            {
+                path: '/data',
+                name: '数据显示',
+                component: GasData,
+            },
+            {
+                path: '/charts',
+                name: '图表显示',
+                component: GasCharts,
+            },
+        ]
     },
 
 ]

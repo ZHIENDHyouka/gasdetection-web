@@ -98,7 +98,13 @@ export default {
       this.clearLoginForm();
     },
     login(loginForm) {
-      this.$router.replace('/home')
+      // this.$router.replace('/home')
+      this.$router.push({
+        path:'/home',
+        query:{
+          username:'张三'
+        }
+      })
       this.$refs[loginForm].validate((valid) => {
         if (valid) {
           login(this.loginForm).then(res => {

@@ -1,66 +1,97 @@
 <template>
   <div id="ManageHome">
-    <div id="testChart" style="width: 100%;height:100%;"></div>
+      <el-container>
+        <el-header style="text-align: center; font-size: 12px">
+          <el-menu :default-active="activeIndexHorizontal" class="el-menu-demo" mode="horizontal" @select="handleSelect" style="float: left">
+            <el-menu-item index="1">处理中心</el-menu-item>
+            <el-menu-item index="3" >消息中心</el-menu-item>
+            <el-menu-item index="4">订单管理</el-menu-item>
+          </el-menu>
+<!--          <div class="line"></div>-->
+          <el-dropdown trigger="click">
+            <i class="el-icon-setting" style="margin-right: 15px"></i>
+            <el-dropdown-menu slot="dropdown">
+              <el-dropdown-item>退出</el-dropdown-item>
+              <el-dropdown-item>2</el-dropdown-item>
+              <el-dropdown-item>3</el-dropdown-item>
+            </el-dropdown-menu>
+          </el-dropdown>
+          <span>{{username}}</span>
+        </el-header>
+        <el-container>
+          <el-aside width="200px">
+            <el-menu :default-active="activeIndexVertical" class="el-menu-vertical-demo" mode="vertical"
+                     router active-text-color="rgb(110,0,0)">
+              <el-menu-item v-for="(item,index) in this.$router.options.routes[1].children" :key="index" :index="item.path">{{ item.name }}
+              </el-menu-item>
+            </el-menu>
+          </el-aside>
+          <el-container>
+            <el-main>
+              <router-view/>
+            </el-main>
+            <el-footer>Footer</el-footer>
+          </el-container>
+        </el-container>
+      </el-container>
   </div>
 </template>
 
 <script>
-import 'echarts-gl';
+
 export default {
   name: "ManageHome",
-  data(){
-    return{
-
+  data() {
+    return {
+      activeIndexVertical: this.$router.options.routes[1].children[0].path,
+      activeIndexHorizontal:'1',
+      username:'',
     };
   },
   mounted() {
-    this.drawTestChart()
+    if (this.$route.query.username) window.localStorage.setItem("username",this.$route.query.username);
+    this.username=window.localStorage.getItem("username");
   },
-  methods:{
-    drawTestChart(){
-      const testChart = this.$echarts.init(document.getElementById('testChart'));
-      let option;
-      option = {
-        title: {
-          text: 'Referer of a Website',
-          subtext: 'Fake Data',
-          left: 'center'
-        },
-        tooltip: {
-          trigger: 'item'
-        },
-        legend: {
-          orient: 'vertical',
-          left: 'left'
-        },
-        series: [
-          {
-            name: 'Access From',
-            type: 'pie',
-            radius: '50%',
-            data: [
-              { value: 1048, name: 'Search Engine' },
-              { value: 735, name: 'Direct' },
-              { value: 580, name: 'Email' },
-              { value: 484, name: 'Union Ads' },
-              { value: 300, name: 'Video Ads' }
-            ],
-            emphasis: {
-              itemStyle: {
-                shadowBlur: 10,
-                shadowOffsetX: 0,
-                shadowColor: 'rgba(0, 0, 0, 0.5)'
-              }
-            }
-          }
-        ]
-      };
-      testChart.setOption(option);
-    },
+  methods: {
+    handleSelect(key, keyPath) {
+      console.log(key, keyPath);
+    }
   }
 }
 </script>
 
 <style scoped>
+.el-header, .el-footer {
+  background-color: #ffffff;
+  color: #333;
+  text-align: center;
+  line-height: 60px;
+}
 
+.el-aside {
+  background-color: #ffffff;
+  color: #333;
+  text-align: center;
+  line-height: 200px;
+}
+
+.el-main {
+  background-color: #ffffff;
+  color: #333;
+  text-align: center;
+  line-height: 160px;
+}
+
+body > .el-container {
+  margin-bottom: 40px;
+}
+
+.el-container:nth-child(5) .el-aside,
+.el-container:nth-child(6) .el-aside {
+  line-height: 260px;
+}
+
+.el-container:nth-child(7) .el-aside {
+  line-height: 320px;
+}
 </style>
