@@ -50,8 +50,9 @@ service.interceptors.response.use(function (res) {
     return res.data;
 }, function (error) {
     loading.close();
-    if (error.response.data.message) Message.error({message:error.response.data.message});
-    return;
+    console.log(error);
+    // if (error.response.data.message) Message.error({message:error.response.data.message});
+    // return;
 });
 
 

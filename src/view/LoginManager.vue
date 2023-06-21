@@ -5,12 +5,12 @@
           :rules="loginRules" ref="loginForm"
           class="loginContainer" :model="loginForm">
         <h3 class="loginTitle">登录</h3>
-        <el-form-item prop="userAccount">
-          <el-input type="text" placeholder="请输入账号" v-model="loginForm.userAccount"></el-input>
+        <el-form-item prop="username">
+          <el-input type="text" placeholder="请输入账号" v-model="loginForm.username"></el-input>
         </el-form-item>
-        <el-form-item prop="userPwd">
+        <el-form-item prop="password">
           <el-input type="password" auto-complete="false"
-                    placeholder="请输入密码" v-model="loginForm.userPwd"></el-input>
+                    placeholder="请输入密码" v-model="loginForm.password"></el-input>
         </el-form-item>
         <el-form-item>
           <el-button type="primary" round style="margin-left: 80px; width: 100px" @click="login('loginForm')">登录
@@ -24,20 +24,16 @@
       <el-form ref="registerForm" class="loginContainer"
                :model="registerForm" :rules="registerRules">
         <h3 class="loginTitle">注册</h3>
-        <el-form-item prop="userAccount">
-          <el-input type="text" placeholder="请输入账号" v-model="registerForm.userAccount"></el-input>
-        </el-form-item>
-        <el-form-item prop="userPwd">
-          <el-input type="password" auto-complete="false"
-                    placeholder="请输入密码" v-model="registerForm.userPwd"></el-input>
-        </el-form-item>
-        <el-form-item prop="userName">
+        <el-form-item prop="username">
           <el-input auto-complete="false" type="text"
-                    placeholder="请输入昵称" v-model="registerForm.userName"></el-input>
+                    placeholder="请输入用户名"  v-model.trim="registerForm.username"
+                    maxlength="7"></el-input>
+<!--          oninput="if(value.length>11)value=value.slice(0,10)"-->
         </el-form-item>
-        <el-form-item prop="sex">
-          <el-radio v-model="registerForm.sex" label="1">男</el-radio>
-          <el-radio v-model="registerForm.sex" label="0">女</el-radio>
+        <el-form-item prop="password">
+          <el-input type="password" auto-complete="false"
+                    placeholder="请输入密码" v-model.trim="registerForm.password"
+                    maxlength="10"></el-input>
         </el-form-item>
         <el-form-item>
           <el-button type="primary" round style="margin-left: 80px; width: 100px" @click="register('registerForm')">注册
@@ -58,35 +54,27 @@ export default {
     return {
       showRegisterOrLogin: false,
       registerForm: {
-        userAccount: '',
-        userPwd: '',
-        userName: '',
-        sex: '',
+        username: '',
+        password: '',
       },
       loginForm: {
-        userAccount: '',
-        userPwd: '',
+        username: '',
+        password: '',
       },
       loginRules: {
-        userAccount: [
+        username: [
           {required: true, message: '请输入账号', trigger: 'blur'},
         ],
-        userPwd: [
+        password: [
           {required: true, message: '请输入密码', trigger: 'blur'},
         ],
       },
       registerRules: {
-        userAccount: [
+        username: [
           {required: true, message: '请输入账号', trigger: 'blur'},
         ],
-        userPwd: [
+        password: [
           {required: true, message: '请输入密码', trigger: 'blur'},
-        ],
-        userName: [
-          {required: true, message: '请输入用户名', trigger: 'blur'},
-        ],
-        sex: [
-          { required: true, message: '请至少选择一个性别', trigger: 'change'},
         ],
       },
     }
@@ -99,22 +87,31 @@ export default {
     },
     login(loginForm) {
       // this.$router.replace('/home')
-      this.$router.push({
-        path:'/home',
-        query:{
-          username:'张三'
-        }
-      })
+      // this.$router.push({
+      //   path:'/home',
+      //   query:{
+      //     username:'张三'
+      //   }
+      // })
       this.$refs[loginForm].validate((valid) => {
         if (valid) {
           login(this.loginForm).then(res => {
             const message = res.msg;
             const code = res.code;
+            const username  = res.data;
+            console.log(res);
             const flag = this.returnInfo(message, code);
-            window.localStorage.setItem("userId",res.data);
+            // window.localStorage.setItem("userId",res.data);
             if (flag) {
               this.clearLoginForm();
-              this.$router.replace('/home');//页面跳转
+              // this.$router.replace('/home');
+              //页面跳转
+              this.$router.push({
+                path:'/home',
+                query:{
+                  username: username
+                }
+              })
             }
           })
         } else {
@@ -127,13 +124,14 @@ export default {
       this.$refs[registerForm].validate((valid) => {
         if (valid) {
           register(this.registerForm).then((res) => {
+            console.log(res);
             const message = res.msg;
             const code = res.code;
             const flag = this.returnInfo(message, code);
             if (flag) {
               this.changeRegister();
-              this.loginForm.userAccount = this.registerForm.userAccount;
-              this.loginForm.userPwd = this.registerForm.userPwd;
+              this.loginForm.username = this.registerForm.username;
+              this.loginForm.password = this.registerForm.password;
             }
           });
         } else {
@@ -144,17 +142,15 @@ export default {
       // this.showRegisterOrLogin=!this.showRegisterOrLogin;
     },
     clearLoginForm() {
-      this.loginForm.userAccount = '';
-      this.loginForm.userPwd = '';
+      this.loginForm.username = '';
+      this.loginForm.password = '';
     },
     clearRegisterForm() {
-      this.registerForm.sex = '';
-      this.registerForm.userAccount = '';
-      this.registerForm.userName = '';
-      this.registerForm.userPwd = '';
+      this.registerForm.username = '';
+      this.registerForm.password = '';
     },
     returnInfo(message, code) {
-      if (code === 0) {
+      if (code === 1) {
         this.$message.success(message);
         return true;
       } else {

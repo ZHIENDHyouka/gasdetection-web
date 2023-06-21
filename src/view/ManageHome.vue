@@ -1,7 +1,7 @@
 <template>
   <div id="ManageHome">
       <el-container>
-        <el-header style="text-align: center; font-size: 12px">
+        <el-header >
           <el-menu :default-active="activeIndexHorizontal" class="el-menu-demo" mode="horizontal" @select="handleSelect" style="float: left">
             <el-menu-item index="1">处理中心</el-menu-item>
             <el-menu-item index="3" >消息中心</el-menu-item>
@@ -9,7 +9,7 @@
           </el-menu>
 <!--          <div class="line"></div>-->
           <el-dropdown trigger="click">
-            <i class="el-icon-setting" style="margin-right: 15px"></i>
+            <i class="el-icon-setting" style="margin-left: 500px;padding-right: 10px"></i>
             <el-dropdown-menu slot="dropdown">
               <el-dropdown-item>退出</el-dropdown-item>
               <el-dropdown-item>2</el-dropdown-item>
@@ -30,7 +30,6 @@
             <el-main>
               <router-view/>
             </el-main>
-            <el-footer>Footer</el-footer>
           </el-container>
         </el-container>
       </el-container>
@@ -94,4 +93,17 @@ body > .el-container {
 .el-container:nth-child(7) .el-aside {
   line-height: 320px;
 }
+
+.el-header{
+  text-align: center;
+  font-size: 12px;
+  border-bottom: 1px solid #eae6e6;
+}
+
+.el-aside{
+  border-top: 1px solid  #eae6e6;
+  height: 635px;
+  border-right: 1px solid #eae6e6;
+}
+
 </style>

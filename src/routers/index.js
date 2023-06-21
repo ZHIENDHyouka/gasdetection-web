@@ -20,7 +20,7 @@ const routes = [
         children: [
             {
                 path: '/data',
-                name: '数据显示',
+                name: '基本数据',
                 component: GasData,
             },
             {
