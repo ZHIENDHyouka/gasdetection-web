@@ -17,3 +17,19 @@ export function register(param) {
         data: param,
     })
 }
+
+//获取所有温度数据
+export function getAllTemperatureData(){
+    return axios({
+        url:"temperature/getAllTemperatureList",
+        method:'get',
+    })
+}
+
+//获取所有设备名称
+export function getAllDeviceName(){
+    return axios({
+        url:'device/getDeviceNameList',
+        method:'get'
+    })
+}

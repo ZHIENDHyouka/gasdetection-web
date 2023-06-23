@@ -1,33 +1,77 @@
 <template>
-<div id="GasData">
-  <div class="queryBar">
-    <span>数据筛选</span>
-  </div>
-  <div class="tablePart">
-    <el-table
-        :data="this.tableData.slice((this.currentPage-1)*this.pageSize,this.pageSize*this.currentPage)"
-        style="width: 100%" :cell-style="columnStyle" :header-cell-style="{'text-align':'center'}">
-      <!-- <el-table-column type="index"></el-table-column> -->
-      <el-table-column v-for="(item,key) in this.tableHead" :key="key" :property="item.proper"
-                       :label="item.label" width="110px">
-      </el-table-column>
-    </el-table>
-    <div class="page">
-      <el-pagination @size-change="handleSizeChange" @current-change="handleCurrentChange"
-                     :current-page="currentPage" :page-sizes="[5, 10, 20, 50]" :page-size="5"
-                     layout="total, sizes, prev, pager, next, jumper" :total="this.tableData.length">
-      </el-pagination>
+  <div id="GasData">
+    <div class="queryBar">
+      <span class="demonstration">数据筛选：</span>
+      <div>
+        <el-select v-model="queryGas" placeholder="请选择查询的数据"
+                   filterable clearable style="margin-right: 20px"
+                    @change="getGasDataList">
+        <el-option-group
+            v-for="group in gasOptions"
+            :key="group.label"
+            :label="group.label">
+          <el-option
+              v-for="item in group.options"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value">
+          </el-option>
+        </el-option-group>
+        </el-select>
+      </div>
+      <div class="block">
+        <span class="demonstration">时间范围：</span>
+        <el-date-picker
+            @change="getDateTimeRangeData"
+            v-model="queryDateTime"
+            type="datetimerange"
+            value-format="yyyy-MM-dd HH:mm:ss"
+            range-separator="至"
+            start-placeholder="开始日期"
+            end-placeholder="结束日期"
+            style="margin-right: 20px;width: 360px">
+        </el-date-picker>
+      </div>
+      <div>
+        <span class="demonstration">设备选择：</span>
+        <el-select v-model="queryDevice" clearable placeholder="请选择"
+                   @change="getDeviceDataList">
+          <el-option
+              v-for="item in deviceList"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value">
+          </el-option>
+        </el-select>
+      </div>
+    </div>
+    <div class="tablePart">
+      <el-table
+          :data="this.tableData.slice((this.currentPage-1)*this.pageSize,this.pageSize*this.currentPage)"
+          style="width: 100%" :cell-style="columnStyle" :header-cell-style="headCellStyle"  height="500">
+        <!-- <el-table-column type="index"></el-table-column> -->
+        <el-table-column v-for="(item,key) in this.tableHead" :key="key" :property="item.proper"
+                         :label="item.label" :render-header="renderHeader">
+        </el-table-column>
+      </el-table>
+      <div class="page">
+        <el-pagination @size-change="handleSizeChange" @current-change="handleCurrentChange"
+                       :current-page="currentPage" :page-sizes="[10, 50, 100, 500]" :page-size="5"
+                       layout="total, sizes, prev, pager, next, jumper" :total="this.tableData.length">
+        </el-pagination>
+      </div>
     </div>
   </div>
-</div>
 </template>
 
 <script>
+import {getAllDeviceName, getAllTemperatureData} from "@/utils/api";
+
 export default {
   name: "GasData",
-  data(){
-    return{
-      tableHead:[{
+  data() {
+    return {
+      tableHead: [{
         label: '日期',
         proper: "date",
       }, {
@@ -37,7 +81,7 @@ export default {
         label: '地址',
         pro: "address",
       }],
-      tableData:[{
+      tableData: [{
         date: '2016-05-02',
         name: '王小虎',
         address: '上海市普陀区金沙江路 1518 弄'
@@ -55,10 +99,48 @@ export default {
         address: '上海市普陀区金沙江路 1516 弄'
       }],
       currentPage: 1,
-      pageSize: 5,
+      pageSize: 10,
+      gasOptions: [{
+        label: '常规',
+        options: [{
+          value: '温度',
+          label: '温度'
+        }, {
+          value: '湿度',
+          label: '湿度'
+        }]
+      }, {
+        label: '有害气体',
+        options: [{
+          value: 'PM2.5',
+          label: 'PM2.5'
+        }, {
+          value: 'PM10',
+          label: 'PM10'
+        }, {
+          value: 'SO2',
+          label: 'SO2'
+        }, {
+          value: 'NO2',
+          label: 'NO2'
+        },{
+            value: 'CO',
+            label: 'CO'
+          },{
+            value: 'O3',
+            label: 'O3'
+          }]
+      }],
+      queryGas: '',
+      queryDateTime:'',
+      queryDevice:'',
+      deviceList:[],
     }
   },
   mounted() {
+    this.queryGas="温度";
+    this.getAllTemperatureList();
+    this.getDeviceNameList();
   },
   methods: {
     handleSizeChange(val) {
@@ -68,25 +150,81 @@ export default {
       this.currentPage = val;
     },
     columnStyle() {
-      return "text-align:center;"
+      return "text-align:center;height:55px";
     },
+    headCellStyle() {
+      return "text-align:center;height:65px;background:#eef1f6;color:#606266;";
+    },
+    renderHeader(h, {column}) {
+      let realWidth = 0;
+      let span = document.createElement('span');
+
+      span.innerText = column.label;
+      document.body.appendChild(span);
+
+      realWidth = span.getBoundingClientRect().width;
+      column.minWidth = realWidth; // 可能还有边距/边框等值，需要根据实际情况加上
+
+      document.body.removeChild(span);
+      return h('span', column.label);
+    },
+    getAllTemperatureList() {
+      getAllTemperatureData().then(res => {
+        console.log(res.data);
+        this.tableData = res.data.dataList;
+        this.tableHead = res.data.headList;
+        if (this.tableData.length===0){
+          this.$message.warning("暂无数据!");
+        }
+        console.log("数据获取!");
+      })
+    },
+    getDateTimeRangeData(){
+      if (this.queryDateTime)
+      console.log(this.queryDateTime);
+    },
+    getGasDataList(){
+      if (this.queryGas)
+      console.log(this.queryGas);
+    },
+    getDeviceDataList(){
+      if (this.queryDevice)
+        console.log(this.queryDevice);
+    },
+    getDeviceNameList(){
+      getAllDeviceName().then(res=>{
+        // console.log(res);
+        this.deviceList=res.data;
+      })
+    }
   }
 }
 </script>
 
 <style scoped>
-.queryBar{
-  width: 100px;
+.queryBar {
+  display: flex;
+  width: auto;
+  height: 55px;
 }
-.tablePart{
-}
-.page{
 
+.tablePart {
+  border-top: 1px solid #eae6e6;
 }
-.el-pagination{
+
+/*.el-table__header{*/
+/*  width: 100% !important;*/
+/*}*/
+/*.el-table__body{*/
+/*  width: 100% !important;*/
+/*}*/
+.el-pagination {
   width: 80%;
   height: 60px;
   position: fixed;
   bottom: 0;
+}
+.queryBar span{
+  line-height: 40px;
 }
 </style>

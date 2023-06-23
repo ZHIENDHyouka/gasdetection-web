@@ -54,7 +54,7 @@ export default {
   methods: {
     handleSelect(key, keyPath) {
       console.log(key, keyPath);
-    }
+    },
   }
 }
 </script>
@@ -78,7 +78,7 @@ export default {
   background-color: #ffffff;
   color: #333;
   text-align: center;
-  line-height: 160px;
+  /*line-height: 160px;*/
 }
 
 body > .el-container {
