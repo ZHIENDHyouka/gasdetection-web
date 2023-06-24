@@ -21,7 +21,7 @@ export function register(param) {
 //获取所有温度数据
 export function getAllTemperatureData(){
     return axios({
-        url:"temperature/getAllTemperatureList",
+        url:"gas/getAllTemperatureList",
         method:'get',
     })
 }
@@ -31,5 +31,14 @@ export function getAllDeviceName(){
     return axios({
         url:'device/getDeviceNameList',
         method:'get'
+    })
+}
+
+//根据条件查询数据
+export function getConditionData(param){
+    return axios({
+        url:'gas/getConditionTableData',
+        method:'post',
+        data:param
     })
 }

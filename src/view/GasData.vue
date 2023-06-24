@@ -5,7 +5,7 @@
       <div>
         <el-select v-model="queryGas" placeholder="请选择查询的数据"
                    filterable clearable style="margin-right: 20px"
-                    @change="getGasDataList">
+                    @change="getConditionTableDate">
         <el-option-group
             v-for="group in gasOptions"
             :key="group.label"
@@ -22,7 +22,7 @@
       <div class="block">
         <span class="demonstration">时间范围：</span>
         <el-date-picker
-            @change="getDateTimeRangeData"
+            @change="getConditionTableDate"
             v-model="queryDateTime"
             type="datetimerange"
             value-format="yyyy-MM-dd HH:mm:ss"
@@ -35,7 +35,7 @@
       <div>
         <span class="demonstration">设备选择：</span>
         <el-select v-model="queryDevice" clearable placeholder="请选择"
-                   @change="getDeviceDataList">
+                   @change="getConditionTableDate">
           <el-option
               v-for="item in deviceList"
               :key="item.value"
@@ -65,7 +65,7 @@
 </template>
 
 <script>
-import {getAllDeviceName, getAllTemperatureData} from "@/utils/api";
+import {getAllDeviceName, getAllTemperatureData, getConditionData} from "@/utils/api";
 
 export default {
   name: "GasData",
@@ -111,7 +111,11 @@ export default {
         }]
       }, {
         label: '有害气体',
-        options: [{
+        options: [
+          {
+            value: '全部',
+            label: '全部'
+          },{
           value: 'PM2.5',
           label: 'PM2.5'
         }, {
@@ -179,9 +183,23 @@ export default {
         console.log("数据获取!");
       })
     },
-    getDateTimeRangeData(){
-      if (this.queryDateTime)
-      console.log(this.queryDateTime);
+    getConditionTableDate(){
+      if (this.queryDateTime||this.queryGas||this.queryDevice) {
+        const condition={
+          datetime:this.queryDateTime,
+          gas:this.queryGas,
+          device:this.queryDevice
+        };
+        getConditionData(condition).then(res=>{
+          this.tableData = res.data.dataList;
+          this.tableHead = res.data.headList;
+          if (this.tableData.length===0){
+            this.$message.warning("暂无数据!");
+          }
+          console.log(res);
+          console.log("数据获取!");
+        })
+      }
     },
     getGasDataList(){
       if (this.queryGas)
