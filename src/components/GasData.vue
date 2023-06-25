@@ -201,14 +201,6 @@ export default {
         })
       }
     },
-    getGasDataList(){
-      if (this.queryGas)
-      console.log(this.queryGas);
-    },
-    getDeviceDataList(){
-      if (this.queryDevice)
-        console.log(this.queryDevice);
-    },
     getDeviceNameList(){
       getAllDeviceName().then(res=>{
         // console.log(res);
@@ -221,6 +213,8 @@ export default {
 
 <style scoped>
 .queryBar {
+  margin-left: 20px;
+  margin-top: 10px;
   display: flex;
   width: auto;
   height: 55px;
@@ -230,12 +224,6 @@ export default {
   border-top: 1px solid #eae6e6;
 }
 
-/*.el-table__header{*/
-/*  width: 100% !important;*/
-/*}*/
-/*.el-table__body{*/
-/*  width: 100% !important;*/
-/*}*/
 .el-pagination {
   width: 80%;
   height: 60px;

@@ -107,7 +107,8 @@ export default {
               // this.$router.replace('/home');
               //页面跳转
               this.$router.push({
-                path:'/home',
+                // path:'/MainHome',
+                path:`${this.$router.options.routes[1].path}`,
                 query:{
                   username: username
                 }
