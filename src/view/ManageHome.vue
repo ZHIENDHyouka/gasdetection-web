@@ -48,6 +48,9 @@ export default {
     };
   },
   mounted() {
+    this.$router.push({
+      path:'/data',
+    })
     if (this.$route.query.username) window.localStorage.setItem("username",this.$route.query.username);
     this.username=window.localStorage.getItem("username");
   },
@@ -60,25 +63,26 @@ export default {
 </script>
 
 <style scoped>
-.el-header, .el-footer {
-  background-color: #ffffff;
-  color: #333;
-  text-align: center;
-  line-height: 60px;
-}
-
 .el-aside {
   background-color: #ffffff;
   color: #333;
   text-align: center;
   line-height: 200px;
 }
-
+.el-header{
+  background-color: #ffffff;
+  color: #333;
+  text-align: center;
+  line-height: 50px;
+  text-align: center;
+  font-size: 12px;
+  border-bottom: 1px solid #eae6e6;
+}
 .el-main {
   background-color: #ffffff;
   color: #333;
   text-align: center;
-  /*line-height: 160px;*/
+  padding: 0px;
 }
 
 body > .el-container {
@@ -94,11 +98,7 @@ body > .el-container {
   line-height: 320px;
 }
 
-.el-header{
-  text-align: center;
-  font-size: 12px;
-  border-bottom: 1px solid #eae6e6;
-}
+
 
 .el-aside{
   border-top: 1px solid  #eae6e6;
