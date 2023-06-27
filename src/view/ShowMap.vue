@@ -7,8 +7,9 @@
 
 <script>
 import AmapVue from "@amap/amap-vue";
+//地图api安全密钥
 window._AMapSecurityConfig = {
-  securityJsCode: 'c891879c1dbae42e7b5e9485091c2e0f' // '「申请的安全密钥」',
+  securityJsCode: 'c891879c1dbae42e7b5e9485091c2e0f'
 }
 export default {
   name: "ShowMap",

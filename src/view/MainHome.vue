@@ -50,7 +50,7 @@ export default {
   background-color: #ffffff;
   color: #000000;
   text-align: center;
-  line-height: 50px;
+  line-height: 45px;
   text-align: center;
   font-size: 12px;
   border-bottom: 1px solid #8c8888;
@@ -59,14 +59,14 @@ export default {
 .el-menu {
   margin-left: 200px;
   border-bottom: 1px solid #8c8888;
-  height: 60px;
+  height: 59px;
   width: 800px;
 }
 
 .el-menu-item {
   color: rgb(29, 31, 32);
   width: 150px;
-  margin: 0 auto;
+  margin: -1px auto;
   text-align: center;
   display: inline-block;
 }
