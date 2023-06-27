@@ -19,26 +19,56 @@ export function register(param) {
 }
 
 //获取所有温度数据
-export function getAllTemperatureData(){
+export function getAllTemperatureData() {
     return axios({
-        url:"gas/getAllTemperatureList",
-        method:'get',
+        url: "gas/getAllTemperatureList",
+        method: 'get',
     })
 }
 
 //获取所有设备名称
-export function getAllDeviceName(){
+export function getAllDeviceName() {
     return axios({
-        url:'device/getDeviceNameList',
-        method:'get'
+        url: 'device/getDeviceNameList',
+        method: 'get'
     })
 }
 
 //根据条件查询数据
-export function getConditionData(param){
+export function getConditionData(param) {
     return axios({
-        url:'gas/getConditionTableData',
-        method:'post',
-        data:param
+        url: 'gas/getConditionTableData',
+        method: 'post',
+        data: param
+    })
+}
+
+//查询所有待审核用户
+export function getAllManagerReviewData() {
+    return axios({
+        url: 'user/getAllManagerReviewList',
+        method: 'get'
+    })
+}
+
+//同意审核用户
+export function addManagerReview(uid) {
+    return axios({
+        url: 'user/addManagerReview',
+        method: 'post',
+        data: {
+            id:uid
+        }
+    })
+}
+
+//拒绝审核用户
+export function refuseManagerReview(uid) {
+    return axios({
+        url: 'user/refuseManagerReview',
+        method: 'post',
+        data: {
+            id:uid
+        }
     })
 }
