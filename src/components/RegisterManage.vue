@@ -1,8 +1,10 @@
 <template>
 	<div id="RegisterManage">
+		<div>
 		<el-table
 				:data="tableData"
-				style="width: 100%">
+				style="width: 100%"
+				height="650" :cell-style="columnStyle" :header-cell-style="headCellStyle" >
 			<el-table-column
 					label="编号"
 					align="center"
@@ -49,6 +51,7 @@
 				</template>
 			</el-table-column>
 		</el-table>
+		</div>
 	</div>
 </template>
 
@@ -100,8 +103,27 @@
                     }
                     this.getAllManagerReviewList();
                 });
-            }
+            },
+            columnStyle() {
+                return "text-align:center;height:55px";
+            },
+            headCellStyle() {
+                return "text-align:center;height:65px;background:#eef1f6;color:#606266;";
+            },   renderHeader(h, {column}) {
+                let realWidth = 0;
+                let span = document.createElement('span');
+
+                span.innerText = column.label;
+                document.body.appendChild(span);
+
+                realWidth = span.getBoundingClientRect().width;
+                column.minWidth = realWidth; // 可能还有边距/边框等值，需要根据实际情况加上
+
+                document.body.removeChild(span);
+                return h('span', column.label);
+            },
         },
+   
 
     }
 </script>

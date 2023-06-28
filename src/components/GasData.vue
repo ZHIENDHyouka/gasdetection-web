@@ -48,7 +48,7 @@
     <div class="tablePart">
       <el-table
           :data="this.tableData.slice((this.currentPage-1)*this.pageSize,this.pageSize*this.currentPage)"
-          style="width: 100%" :cell-style="columnStyle" :header-cell-style="headCellStyle"  height="500">
+          style="width: 100%" :cell-style="columnStyle" :header-cell-style="headCellStyle"  height="500" :render-header="renderHeader">
         <!-- <el-table-column type="index"></el-table-column> -->
         <el-table-column v-for="(item,key) in this.tableHead" :key="key" :property="item.proper"
                          :label="item.label" :render-header="renderHeader">
