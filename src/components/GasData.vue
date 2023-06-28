@@ -66,6 +66,7 @@
 
 <script>
 import {getAllDeviceName, getAllTemperatureData, getConditionData} from "@/utils/api";
+import {inintWebSocket} from "@/utils/websocketUtil";
 
 export default {
   name: "GasData",
@@ -135,18 +136,21 @@ export default {
             label: 'O3'
           }]
       }],
-      queryGas: '',
+      queryGas: '温度',
       queryDateTime:'',
       queryDevice:'',
       deviceList:[],
     }
   },
   mounted() {
-    this.queryGas="温度";
+    inintWebSocket();
     this.getAllTemperatureList();
     this.getDeviceNameList();
   },
   methods: {
+    // connectWebSocket(){
+    //   this.webSocket.onopen();//开始连接
+    // },
     handleSizeChange(val) {
       this.pageSize = val;
     },

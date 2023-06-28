@@ -1,13 +1,4 @@
 const { defineConfig } = require('@vue/cli-service')
-// let proxyObj={}
-// proxyObj['/']={
-//   ws:false,
-//   target:'http://localhost:8083',
-//   changeOrigin:true,
-//   pathRewrite:{
-//     '^/':'/'
-//   }
-// }
 module.exports = defineConfig({
   transpileDependencies: true,
   // lintOnSave:false,//关闭语法检测
@@ -23,9 +14,8 @@ module.exports = defineConfig({
         pathRewrite:{
           '^/api':'/'
         }
-      }
+      },
     },
-    // lintOnSave: true // 是否保存时校验eslint
   }
 })
 

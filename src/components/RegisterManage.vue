@@ -10,7 +10,6 @@
 					prop="id"
 			>
 			</el-table-column>
-			
 			<el-table-column
 					label="用户名"
 					prop="username"
