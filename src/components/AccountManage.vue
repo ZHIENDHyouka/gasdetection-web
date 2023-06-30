@@ -17,7 +17,7 @@
         </el-option>
       </el-select>
       <el-input
-          v-show="searchBarChangeFlag"
+          v-show="searchBarInputShow"
           size="medium"
           style="width: 180px"
           placeholder="请输入查询的用户名"
@@ -25,7 +25,7 @@
           v-model="searchValue">
       </el-input>
       <el-select v-model="searchValue"
-                 v-show="!searchBarChangeFlag"
+                 v-show="searchBarSelectShow"
                  placeholder="请选择"
                  size="medium"
                  style="width: 120px;">
@@ -39,6 +39,7 @@
       </el-select>
       <el-button type="primary" style="margin-left: 20px;height: 40px;width: 85px;margin-top: 8px"
                  icon="el-icon-search"
+                 v-show="searchButton"
                  size="medium" @click="searchData">搜索</el-button>
     </div>
   </div>
@@ -101,22 +102,27 @@ export default {
     return{
       tableData:[],
       searchValue:'',
-      searchType:1,
+      searchType:3,
       searchTypes:[{
         label:'用户名',
         value:1,
       },{
         label:'账号状态',
         value:2,
-      }],
-      searchBarChangeFlag:true,
+      }, {
+          label:'全部',
+          value:3,
+        }],
+      searchBarInputShow:false,
+      searchBarSelectShow:false,
       statusList:[{
         label:'禁用',
         value:'0',
       },{
         label:'启用',
         value:'1',
-      }]
+      }],
+      searchButton:false,
     }
   },
   mounted() {
@@ -169,8 +175,22 @@ export default {
       return "text-align:center;height:65px;background:#eef1f6;color:#606266;";
     },
     searchBarChange(){
-      this.searchBarChangeFlag=!this.searchBarChangeFlag;
       this.searchValue='';
+      if (this.searchType===3){
+        this.searchBarInputShow=false;
+        this.searchBarSelectShow=false;
+        this.searchButton=false;
+        this.getAllManagerList();
+      }else if (this.searchType===1){
+        this.searchBarInputShow=true;
+        this.searchBarSelectShow=false
+        this.searchButton=true;
+      }else if (this.searchType===2){
+        this.searchBarSelectShow=true;
+        this.searchBarInputShow=false;
+        this.searchButton=true;
+      }
+
     },
     searchData(){
         if (this.searchValue==='') {
@@ -185,7 +205,9 @@ export default {
             value:this.searchValue,
           }
           searchNameOrStatus(param).then((res)=>{
-            console.log(res);
+            console.log(res.data);
+            if (res.data) this.tableData=res.data;
+
           })
         }
     }

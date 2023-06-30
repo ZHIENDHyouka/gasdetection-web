@@ -78,9 +78,7 @@
                 })
             },
             handleAgree(id) {
-                console.log(id);
                 addManagerReview(id).then(res => {
-                    console.log(res)
                     if (res.code == 1) {
                         this.$message({
                             message: '已同意',
@@ -92,9 +90,7 @@
 
             },
             handleRefuse(id) {
-                console.log(id);
                 refuseManagerReview(id).then(res => {
-                    console.log(res)
                     if (res.code == 1) {
                         this.$message({
                             message: '已拒绝',
