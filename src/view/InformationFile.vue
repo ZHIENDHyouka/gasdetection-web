@@ -1,6 +1,11 @@
 <template>
 <div id="InformationFile">
-  222222
+  <div class="checkBoxBar">
+11
+  </div>
+  <div class="tableBar">
+22
+  </div>
 </div>
 </template>
 
@@ -11,5 +16,14 @@ export default {
 </script>
 
 <style scoped>
-
+.checkBoxBar{
+  background-color: red;
+  height: 120px;
+  width: 100%;
+}
+.tableBar{
+  height: 515px;
+  width: 100%;
+  background-color: #1296db;
+}
 </style>
