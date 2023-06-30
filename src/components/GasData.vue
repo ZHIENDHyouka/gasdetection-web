@@ -4,7 +4,7 @@
       <span class="demonstration">数据筛选：</span>
       <div>
         <el-select v-model="queryGas" placeholder="请选择查询的数据"
-                   filterable clearable style="margin-right: 20px"
+                   filterable style="margin-right: 20px"
                     @change="getConditionTableDate">
         <el-option-group
             v-for="group in gasOptions"

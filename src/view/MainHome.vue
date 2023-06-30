@@ -37,8 +37,10 @@ export default {
       username: '',
     }
   },
+  created() {
+    this.$router.replace("/DataHome");
+  },
   mounted() {
-
     if (this.$route.query.username) window.localStorage.setItem("username", this.$route.query.username);
     this.username = window.localStorage.getItem("username");
   }
