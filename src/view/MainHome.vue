@@ -38,7 +38,7 @@ export default {
     }
   },
   created() {
-    this.$router.replace("/DataHome");
+    this.$router.replace("/HomeCharts");
   },
   mounted() {
     if (this.$route.query.username) window.localStorage.setItem("username", this.$route.query.username);

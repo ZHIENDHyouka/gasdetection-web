@@ -3,7 +3,8 @@ import App from './App.vue'
 import ElementUI from 'element-ui';
 import 'element-ui/lib/theme-chalk/index.css';
 import router from './routers'
-import echarts from 'echarts';
+import * as echarts from 'echarts'
+// import echarts from 'echarts';
 import AmapVue from '@amap/amap-vue'
 Vue.config.productionTip = false
 AmapVue.config.version='2.0'

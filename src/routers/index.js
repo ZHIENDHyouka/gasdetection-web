@@ -3,7 +3,7 @@ import VueRouter from 'vue-router'
 import LoginManager from "@/view/LoginManager";
 import DataHome from "@/view/DataHome"
 import GasData from "@/components/GasData"
-import GasCharts from "@/components/GasCharts";
+import HomeCharts from "@/view/HomeCharts";
 import ManagerHome from "@/view/ManagerHome";
 import AccountManage from "@/components/AccountManage";
 import RegisterManage from "@/components/RegisterManage";
@@ -23,8 +23,12 @@ const routes = [
         path: '/MainHome',
         name: 'MainHome',
         component: MainHome,
-        redirect:'/DataHome',
         children: [
+            {
+                path: '/HomeCharts',
+                name: '首页',
+                component: HomeCharts,
+            },
             {
                 path: '/DataHome',
                 name: '数据展示',
@@ -35,11 +39,6 @@ const routes = [
                         path: '/data',
                         name: '基本数据',
                         component: GasData,
-                    },
-                    {
-                        path: '/charts',
-                        name: '图表显示',
-                        component: GasCharts,
                     },
                 ]
             },
@@ -74,7 +73,15 @@ const routes = [
     },
 
 ]
-
+//解决冗余导航
+const RouterPush = VueRouter.prototype.push
+VueRouter.prototype.push = function push (to) {
+    return RouterPush.call(this, to).catch(err => err)
+}
+const RouterReplace = VueRouter.prototype.replace
+VueRouter.prototype.replace = function replace (to) {
+    return RouterReplace.call(this, to).catch(err => err)
+}
 export default new VueRouter({
     routes
 })

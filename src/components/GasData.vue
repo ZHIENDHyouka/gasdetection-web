@@ -48,10 +48,10 @@
     <div class="tablePart">
       <el-table
           :data="this.tableData.slice((this.currentPage-1)*this.pageSize,this.pageSize*this.currentPage)"
-          style="width: 100%" :cell-style="columnStyle" :header-cell-style="headCellStyle"  height="500" :render-header="renderHeader">
+           :cell-style="columnStyle" :header-cell-style="headCellStyle" height="475" :render-header="renderHeader">
         <!-- <el-table-column type="index"></el-table-column> -->
         <el-table-column v-for="(item,key) in this.tableHead" :key="key" :property="item.proper"
-                         :label="item.label" :render-header="renderHeader">
+                         :label="item.label" >
         </el-table-column>
       </el-table>
       <div class="page">
@@ -217,7 +217,7 @@ export default {
 
 <style scoped>
 .queryBar {
-  margin-left: 20px;
+  margin-left: 150px;
   margin-top: 10px;
   display: flex;
   width: auto;
@@ -226,6 +226,8 @@ export default {
 
 .tablePart {
   border-top: 1px solid #eae6e6;
+  margin-left: 50px;
+  width: 1350px;
 }
 
 .el-pagination {

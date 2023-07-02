@@ -4,7 +4,7 @@
     <el-aside width="200px">
       <el-menu :default-active="activeIndexVertical" class="el-menu-vertical-demo" mode="vertical"
                router active-text-color="rgb(110,0,0)">
-        <el-menu-item v-for="(item,index) in this.$router.options.routes[1].children[1].children" :key="index" :index="item.path">{{ item.name }}
+        <el-menu-item v-for="(item,index) in this.$router.options.routes[1].children[2].children" :key="index" :index="item.path">{{ item.name }}
         </el-menu-item>
       </el-menu>
     </el-aside>

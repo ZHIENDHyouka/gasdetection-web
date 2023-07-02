@@ -125,7 +125,6 @@ export default {
       this.$refs[registerForm].validate((valid) => {
         if (valid) {
           register(this.registerForm).then((res) => {
-            console.log(res);
             const message = res.msg;
             const code = res.code;
             const flag = this.returnInfo(message, code);
