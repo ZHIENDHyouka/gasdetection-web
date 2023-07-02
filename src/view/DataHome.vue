@@ -25,7 +25,7 @@ export default {
   name: "DataHome",
   data() {
     return {
-      activeIndexVertical: this.$router.options.routes[1].children[0].children[0].path,
+      // activeIndexVertical: this.$router.options.routes[1].children[0].children[0].path,
     };
   },
   mounted() {

@@ -11,21 +11,59 @@
 </template>
 
 <script>
+import {getDeviceRunNumber} from "@/utils/api";
+import {closeConnection, inintWebSocket, sendInfo} from "@/utils/websocketUtil";
+
 export default {
   name: "HomeCharts",
   data() {
     return {
+      WebSocket:null,
+      websocketId:null,
       drawCharts1: null,
       drawCharts2: null,
       drawPie: null,
       drawPanel1: null,
       drawPanel2: null,
+      deviceRunNumberXData:[],
+      deviceRunNumberYData:[],
     };
   },
+  created() {
+  },
+  beforeDestroy() {
+    window.clearInterval(this.websocketId);
+    this.WebSocket=closeConnection();
+    this.websocketId=null;
+  },
   mounted() {
+    this.connectWebSocket();
     this.drawInit();
+    this.getData();
   },
   methods: {
+    connectWebSocket(){
+      this.WebSocket=inintWebSocket();
+      this.websocketId=window.setInterval(function () {
+        sendInfo('你好');
+      }, 1000*60*5);
+    },
+    getData(){
+      this.getDeviceData();
+    },
+    getDeviceData(){
+      getDeviceRunNumber().then((res)=>{
+        const code = res.code;
+        const msg = res.msg;
+        if (code===1) {
+          this.deviceRunNumberXData = res.data.x.reverse();
+          this.deviceRunNumberYData = res.data.y;
+          this.drawDeviceNumber();
+        }else if (code===0){
+          this.$message.warning(msg);
+        }
+      })
+    },
     drawInit() {
       this.drawCharts1 = this.$echarts.init(document.getElementById('charts1'));
       this.drawCharts2 = this.$echarts.init(document.getElementById('charts2'));
@@ -33,7 +71,6 @@ export default {
       this.drawPanel2 = this.$echarts.init(document.getElementById('chartPanel2'))
       this.drawPie = this.$echarts.init(document.getElementById('chartPie'))
       this.drawGasLineAndPie();
-      this.drawPieGasProportion();
       this.drawTemperaturePanel();
       this.drawHumidityPanel();
       this.drawAlarmInfoPie();
@@ -109,12 +146,12 @@ export default {
       this.drawCharts1.setOption(option);
       // this.drawCharts2.setOption(option);
     },
-    drawPieGasProportion() {
+    drawDeviceNumber() {
       const option = {
         title: {
           top: '10px',
           left: 'center',
-          text: '7天内设备运作数量',
+          text: '7小时内设备运作数量',
           textStyle: {
             fontFamily: 'Arial',//'sans-serif' | 'serif' | 'monospace' | 'Arial' | 'Courier New'
             // 'Microsoft YaHei'(微软雅黑) ，文字字体
@@ -136,10 +173,9 @@ export default {
         xAxis: [
           {
             type: 'category',
-            data: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
-            axisTick: {
-              alignWithLabel: true
-            }
+            // data: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+            data: this.deviceRunNumberXData,
+            show:false,
           }
         ],
         yAxis: [
@@ -149,11 +185,10 @@ export default {
         ],
         series: [
           {
-            name: 'Direct',
+            name: '设备数量',
             type: 'bar',
-            barWidth: '60%',
-            data: [10, 52, 200, 334, 390, 330, 220],
-            barCategoryGap: '1%',
+            data: this.deviceRunNumberYData,
+            barCategoryGap:5,
             itemStyle: {
               barBorderRadius: 10,
               borderWidth: 2,
@@ -372,8 +407,8 @@ export default {
       const option = {
         title: {
           top: '10px',
-          left: '5px',
-          text: '7天报警信息'
+          left: 'center',
+          text: '7天报警信息数量分布'
         },
         tooltip: {
           trigger: 'item'

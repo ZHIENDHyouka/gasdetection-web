@@ -96,3 +96,11 @@ export function refuseManagerReview(uid) {
         }
     })
 }
+
+//查询设备7小时内的使用数量
+export function getDeviceRunNumber(){
+    return axios({
+        url:'device/getDeviceRunNumber',
+        method:'get',
+    })
+}

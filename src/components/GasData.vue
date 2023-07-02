@@ -66,7 +66,6 @@
 
 <script>
 import {getAllDeviceName, getAllTemperatureData, getConditionData} from "@/utils/api";
-import {inintWebSocket} from "@/utils/websocketUtil";
 
 export default {
   name: "GasData",
@@ -143,7 +142,6 @@ export default {
     }
   },
   mounted() {
-    inintWebSocket();
     this.getAllTemperatureList();
     this.getDeviceNameList();
   },

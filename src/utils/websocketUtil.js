@@ -1,6 +1,6 @@
 //创立连接  127.0.0.1本地host
+let websocket = null;
 export function inintWebSocket() {
-    let websocket = null;
 //判断当前浏览器是否支持WebSocket
     if ('WebSocket' in window) {
         //连接WebSocket节点
@@ -27,7 +27,8 @@ export function inintWebSocket() {
     };
 
 //连接关闭的回调方法
-    websocket.onclose = function () {
+    websocket.onclose = function (event) {
+        console.log(event);
         console.log("连接关闭!");
     };
 
@@ -39,7 +40,17 @@ export function inintWebSocket() {
     websocket.onerror = function () {
         console.log("报错了!")
     };
-
+    //往后端发送信息
+    return websocket;
+}
+//向后端传送数据
+export function sendInfo(message){
+    if (websocket) websocket.send(message);
+    else console.log('websocket未建立连接')
 }
 
+export function closeConnection(){
+    websocket.onclose();
+    return null;
+}
 
