@@ -13,17 +13,15 @@ export function inintWebSocket() {
 //连接成功建立的回调方法
     websocket.onopen = function () {
         console.log("建立连接成功 ...");
-        // 连接建立成功以后，就可以使用这个连接对象通信了
-        // send 方法发送数据
-        websocket.send("Hello WebSockets!");
     };
 
 //接收到消息的回调方法
     websocket.onmessage = function (event) {
-        let data = event.data;
-        console.log("后端传递的数据:" + data);
-        //将后端传递的数据渲染至页面
-        return data;
+        //例子
+        if (!event) {
+            console.log(event);
+            return event;
+        }
     };
 
 //连接关闭的回调方法
@@ -45,8 +43,12 @@ export function inintWebSocket() {
 }
 //向后端传送数据
 export function sendInfo(message){
-    if (websocket) websocket.send(message);
-    else console.log('websocket未建立连接')
+    if (websocket) {
+        websocket.send(message);
+    }
+    else {
+        console.log('websocket未建立连接');
+    }
 }
 
 export function closeConnection(){

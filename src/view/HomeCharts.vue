@@ -12,29 +12,27 @@
 
 <script>
 import {getDeviceRunNumber} from "@/utils/api";
-import {closeConnection, inintWebSocket, sendInfo} from "@/utils/websocketUtil";
+import {closeConnection, inintWebSocket} from "@/utils/websocketUtil";
 
 export default {
   name: "HomeCharts",
   data() {
     return {
-      WebSocket:null,
-      websocketId:null,
+      WebSocket: null,
+      websocketId: null,
       drawCharts1: null,
       drawCharts2: null,
       drawPie: null,
       drawPanel1: null,
       drawPanel2: null,
-      deviceRunNumberXData:[],
-      deviceRunNumberYData:[],
     };
   },
   created() {
   },
   beforeDestroy() {
     window.clearInterval(this.websocketId);
-    this.WebSocket=closeConnection();
-    this.websocketId=null;
+    this.WebSocket = closeConnection();
+    this.websocketId = null;
   },
   mounted() {
     this.connectWebSocket();
@@ -42,24 +40,52 @@ export default {
     this.getData();
   },
   methods: {
-    connectWebSocket(){
-      this.WebSocket=inintWebSocket();
-      this.websocketId=window.setInterval(function () {
-        sendInfo('你好');
-      }, 1000*60*5);
+    connectWebSocket() {
+      this.WebSocket = inintWebSocket();
+      this.rewriteWebSocketFunc();
+      this.websocketId = window.setInterval(function () {
+        // sendInfo('1');
+      }, 2000);
     },
-    getData(){
+    rewriteWebSocketFunc() {
+      if (this.WebSocket) {
+        this.WebSocket.onmessage = ((event) => {
+          if(JSON.parse(event.data).data) {
+              const data = JSON.parse(event.data);
+              this.dynamicDeviceNumber(data);
+          }
+        })
+      }
+    },
+    dynamicDeviceNumber(data){
+      const xData = (data.data.x).reverse();
+      const yData = data.data.y;
+      if (this.drawCharts2){
+        this.drawCharts2.setOption({
+          xAxis: [
+            {
+              data: xData,
+            }
+          ],
+          series: [
+            {
+              data: yData,
+            },
+          ]
+        })
+      }
+
+    },
+    getData() {
       this.getDeviceData();
     },
-    getDeviceData(){
-      getDeviceRunNumber().then((res)=>{
+    getDeviceData() {
+      getDeviceRunNumber().then((res) => {
         const code = res.code;
         const msg = res.msg;
-        if (code===1) {
-          this.deviceRunNumberXData = res.data.x.reverse();
-          this.deviceRunNumberYData = res.data.y;
-          this.drawDeviceNumber();
-        }else if (code===0){
+        if (code === 1) {
+          this.drawDeviceNumber(res.data.x.reverse(),res.data.y);
+        } else if (code === 0) {
           this.$message.warning(msg);
         }
       })
@@ -146,12 +172,12 @@ export default {
       this.drawCharts1.setOption(option);
       // this.drawCharts2.setOption(option);
     },
-    drawDeviceNumber() {
+    drawDeviceNumber(xData,yData) {
       const option = {
         title: {
           top: '10px',
           left: 'center',
-          text: '7小时内设备运作数量',
+          text: '实时设备数量监控',
           textStyle: {
             fontFamily: 'Arial',//'sans-serif' | 'serif' | 'monospace' | 'Arial' | 'Courier New'
             // 'Microsoft YaHei'(微软雅黑) ，文字字体
@@ -174,8 +200,8 @@ export default {
           {
             type: 'category',
             // data: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
-            data: this.deviceRunNumberXData,
-            show:false,
+            data: xData,
+            show: false,
           }
         ],
         yAxis: [
@@ -187,8 +213,8 @@ export default {
           {
             name: '设备数量',
             type: 'bar',
-            data: this.deviceRunNumberYData,
-            barCategoryGap:5,
+            data: yData,
+            barCategoryGap: 5,
             itemStyle: {
               barBorderRadius: 10,
               borderWidth: 2,
@@ -404,52 +430,60 @@ export default {
       this.drawPanel2.setOption(option);
     },
     drawAlarmInfoPie() {
+      const data = [["2000-06-05", 116], ["2000-06-06", 129], ["2000-06-07", 135], ["2000-06-08", 86], ["2000-06-09", 73], ["2000-06-10", 85], ["2000-06-11", 73], ["2000-06-12", 68], ["2000-06-13", 92], ["2000-06-14", 130], ["2000-06-15", 245], ["2000-06-16", 139], ["2000-06-17", 115], ["2000-06-18", 111], ["2000-06-19", 309], ["2000-06-20", 206], ["2000-06-21", 137], ["2000-06-22", 128], ["2000-06-23", 85], ["2000-06-24", 94], ["2000-06-25", 71], ["2000-06-26", 106], ["2000-06-27", 84], ["2000-06-28", 93], ["2000-06-29", 85], ["2000-06-30", 73], ["2000-07-01", 83], ["2000-07-02", 125], ["2000-07-03", 107], ["2000-07-04", 82], ["2000-07-05", 44], ["2000-07-06", 72], ["2000-07-07", 106], ["2000-07-08", 107], ["2000-07-09", 66], ["2000-07-10", 91], ["2000-07-11", 92], ["2000-07-12", 113], ["2000-07-13", 107], ["2000-07-14", 131], ["2000-07-15", 111], ["2000-07-16", 64], ["2000-07-17", 69], ["2000-07-18", 88], ["2000-07-19", 77], ["2000-07-20", 83], ["2000-07-21", 111], ["2000-07-22", 57], ["2000-07-23", 55], ["2000-07-24", 60]];
+      const dateList = data.map(function (item) {
+        return item[0];
+      });
+      const valueList = data.map(function (item) {
+        return item[1];
+      });
       const option = {
+        // Make gradient line here
+        visualMap: [
+          {
+            show: false,
+            type: 'continuous',
+            seriesIndex: 0,
+            min: 0,
+            max: 400
+          },
+        ],
         title: {
           top: '10px',
           left: 'center',
-          text: '7天报警信息数量分布'
+          text: '实时报警信息',
+          textStyle: {
+            fontFamily: 'Arial',//'sans-serif' | 'serif' | 'monospace' | 'Arial' | 'Courier New'
+            // 'Microsoft YaHei'(微软雅黑) ，文字字体
+            fontSize: 18, //字体大小
+          },
         },
         tooltip: {
-          trigger: 'item'
+          trigger: 'axis'
         },
-        legend: {
-          top: '10%',
-          left: 'center'
-        },
+        xAxis: [
+          {
+            data: dateList
+          },
+        ],
+        yAxis: [
+          {},
+        ],
+        grid: [
+          {
+            bottom: '15%'
+          },
+          {
+            top: '60%'
+          }
+        ],
         series: [
           {
-            name: 'Access From',
-            type: 'pie',
-            radius: ['40%', '60%'],
-            avoidLabelOverlap: false,
-            itemStyle: {
-              borderRadius: 20,
-              borderColor: '#fff',
-              borderWidth: 3
-            },
-            label: {
-              show: false,
-              position: 'center'
-            },
-            emphasis: {
-              label: {
-                show: true,
-                fontSize: 20,
-                fontWeight: 'bold'
-              }
-            },
-            labelLine: {
-              show: false
-            },
-            data: [
-              {value: 1048, name: 'Search Engine'},
-              {value: 735, name: 'Direct'},
-              {value: 580, name: 'Email'},
-              {value: 484, name: 'Union Ads'},
-              {value: 300, name: 'Video Ads'}
-            ]
-          }
+            type: 'line',
+            showSymbol: false,
+            data: valueList
+          },
+
         ]
       };
       this.drawPie.setOption(option);
