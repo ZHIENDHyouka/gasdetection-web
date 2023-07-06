@@ -219,6 +219,11 @@
                                 type: 'success',
                                 message: '导出成功!'
                             });
+                        }else {
+                            this.$message({
+                                type: 'error',
+                                message: '导出失败请联系管理员'
+                            });
                         }
                     })
 
