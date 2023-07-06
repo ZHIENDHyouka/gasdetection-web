@@ -110,10 +110,26 @@ export function exportedData(number,gas,data) {
     })
 }
 
-//查询设备7小时内的使用数量
+//查询实时数据设备的使用数量
 export function getDeviceRunNumber(){
     return axios({
         url:'device/getDeviceRunNumber',
+        method:'get',
+    })
+}
+
+//查询报警信息实时数据
+export function getRealTimeAlarmDataer(){
+    return axios({
+        url:'alarm/getRealTimeAlarmDataer',
+        method:'get'
+    })
+}
+
+//查询初始化有害气体数据
+export function getHarmfulGasAvgData(){
+    return axios({
+        url:'gas/getHarmfulGasAvgData',
         method:'get',
     })
 }

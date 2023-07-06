@@ -52,7 +52,9 @@ export function sendInfo(message){
 }
 
 export function closeConnection(){
-    websocket.onclose();
+    if (websocket) {
+        websocket.onclose();
+    }
     return null;
 }
 

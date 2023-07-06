@@ -2,7 +2,7 @@
   <div id="HomeCharts">
     <div class="HomeContainer">
       <div id="charts2" class="partContainer"></div>
-      <div id="chartPie" class="partContainer"></div>
+      <div id="drawLine" class="partContainer"></div>
       <div id="chartPanel1" class="partContainer"></div>
       <div id="chartPanel2" class="partContainer"></div>
       <div id="charts1" class="linePartContainer"></div>
@@ -11,8 +11,8 @@
 </template>
 
 <script>
-import {getDeviceRunNumber} from "@/utils/api";
-import {closeConnection, inintWebSocket} from "@/utils/websocketUtil";
+import {getDeviceRunNumber, getHarmfulGasAvgData, getRealTimeAlarmDataer} from "@/utils/api";
+import {inintWebSocket, sendInfo} from "@/utils/websocketUtil";
 
 export default {
   name: "HomeCharts",
@@ -25,13 +25,14 @@ export default {
       drawPie: null,
       drawPanel1: null,
       drawPanel2: null,
+
     };
   },
   created() {
   },
   beforeDestroy() {
     window.clearInterval(this.websocketId);
-    this.WebSocket = closeConnection();
+    // this.WebSocket = closeConnection();
     this.websocketId = null;
   },
   mounted() {
@@ -41,18 +42,25 @@ export default {
   },
   methods: {
     connectWebSocket() {
-      this.WebSocket = inintWebSocket();
-      this.rewriteWebSocketFunc();
+      if(!this.WebSocket) {
+        this.WebSocket = inintWebSocket();
+        this.rewriteWebSocketFunc();
+      }
       this.websocketId = window.setInterval(function () {
-        // sendInfo('1');
+        sendInfo('1');
+        // console.log( this.WebSocket);
       }, 2000);
     },
     rewriteWebSocketFunc() {
       if (this.WebSocket) {
         this.WebSocket.onmessage = ((event) => {
-          if(JSON.parse(event.data).data) {
+          if(JSON.parse(event.data)) {
               const data = JSON.parse(event.data);
-              this.dynamicDeviceNumber(data);
+              console.log(data);
+              this.dynamicDeviceNumber(JSON.parse(data.deviceNumberData));
+              this.dynamicAlarmInfo(JSON.parse(data.alarmInfoData).datetime,JSON.parse(data.alarmInfoData).number);
+              this.dynamicTemperatureDatar(data.temperatureData);
+              this.dynamicHumidityDatar(data.humidityData)
           }
         })
       }
@@ -74,10 +82,80 @@ export default {
           ]
         })
       }
-
+    },
+    dynamicAlarmInfo(date,value){
+      if (this.drawLine) {
+        //更新数据
+        const xData = this.drawLine.getOption().xAxis[0].data;
+        const yData = this.drawLine.getOption().series[0].data;
+        xData.shift();
+        yData.shift();
+        xData.push(date);
+        yData.push(value);
+        this.drawLine.setOption({
+          xAxis: [
+            {
+              data: xData,
+            }
+          ],
+          series: [
+            {
+              data: yData,
+            },
+          ]
+        })
+      }
+    },
+    dynamicTemperatureDatar(value){
+      if (this.drawPanel1) {
+        this.drawPanel1.setOption({
+          series: [
+            {
+              data: [
+                {
+                  value: value,
+                  name: '温度仪表盘'
+                }
+              ]
+            },
+            {
+              data: [
+                {
+                  value: value
+                }
+              ]
+            },
+          ]
+        })
+      }
+    },
+    dynamicHumidityDatar(value){
+      if (this.drawPanel2){
+        this.drawPanel2.setOption({
+          series: [{
+            data: [
+              {
+                value: value,
+                name: '湿度仪表盘'
+              }
+            ]
+          }]
+        })
+      }
     },
     getData() {
       this.getDeviceData();
+      this.getAlarmData();
+      this.getHarmfulGasData();
+    },
+    getAlarmData(){
+      getRealTimeAlarmDataer().then((res)=>{
+        if (res.code === 1) {
+          this.drawAlarmInfoLine(res.data.dateList,res.data.valueList);
+        } else if (res.code === 0) {
+          this.$message.warning(res.msg);
+        }
+      })
     },
     getDeviceData() {
       getDeviceRunNumber().then((res) => {
@@ -90,16 +168,20 @@ export default {
         }
       })
     },
+    getHarmfulGasData(){
+      getHarmfulGasAvgData().then((res)=>{
+        console.log(res.data);
+      })
+    },
     drawInit() {
       this.drawCharts1 = this.$echarts.init(document.getElementById('charts1'));
       this.drawCharts2 = this.$echarts.init(document.getElementById('charts2'));
       this.drawPanel1 = this.$echarts.init(document.getElementById('chartPanel1'))
       this.drawPanel2 = this.$echarts.init(document.getElementById('chartPanel2'))
-      this.drawPie = this.$echarts.init(document.getElementById('chartPie'))
+      this.drawLine= this.$echarts.init(document.getElementById('drawLine'))
       this.drawGasLineAndPie();
       this.drawTemperaturePanel();
       this.drawHumidityPanel();
-      this.drawAlarmInfoPie();
     },
     drawGasLineAndPie() {
       const option = {
@@ -294,7 +376,7 @@ export default {
             },
             data: [
               {
-                value: 20
+                value: 0
               }
             ]
           },
@@ -332,7 +414,7 @@ export default {
             },
             data: [
               {
-                value: 20,
+                value: 0,
                 name: '温度仪表盘'
               }
             ]
@@ -389,7 +471,7 @@ export default {
             },
             axisLabel: {
               color: '#464646',
-              fontSize: 14,
+              fontSize: 13,
               distance: -85,
               rotate: 'tangential',
               formatter: function (value) {
@@ -420,7 +502,7 @@ export default {
             },
             data: [
               {
-                value: 0.7,
+                value: 0,
                 name: '湿度表盘'
               }
             ]
@@ -429,14 +511,13 @@ export default {
       };
       this.drawPanel2.setOption(option);
     },
-    drawAlarmInfoPie() {
-      const data = [["2000-06-05", 116], ["2000-06-06", 129], ["2000-06-07", 135], ["2000-06-08", 86], ["2000-06-09", 73], ["2000-06-10", 85], ["2000-06-11", 73], ["2000-06-12", 68], ["2000-06-13", 92], ["2000-06-14", 130], ["2000-06-15", 245], ["2000-06-16", 139], ["2000-06-17", 115], ["2000-06-18", 111], ["2000-06-19", 309], ["2000-06-20", 206], ["2000-06-21", 137], ["2000-06-22", 128], ["2000-06-23", 85], ["2000-06-24", 94], ["2000-06-25", 71], ["2000-06-26", 106], ["2000-06-27", 84], ["2000-06-28", 93], ["2000-06-29", 85], ["2000-06-30", 73], ["2000-07-01", 83], ["2000-07-02", 125], ["2000-07-03", 107], ["2000-07-04", 82], ["2000-07-05", 44], ["2000-07-06", 72], ["2000-07-07", 106], ["2000-07-08", 107], ["2000-07-09", 66], ["2000-07-10", 91], ["2000-07-11", 92], ["2000-07-12", 113], ["2000-07-13", 107], ["2000-07-14", 131], ["2000-07-15", 111], ["2000-07-16", 64], ["2000-07-17", 69], ["2000-07-18", 88], ["2000-07-19", 77], ["2000-07-20", 83], ["2000-07-21", 111], ["2000-07-22", 57], ["2000-07-23", 55], ["2000-07-24", 60]];
-      const dateList = data.map(function (item) {
-        return item[0];
-      });
-      const valueList = data.map(function (item) {
-        return item[1];
-      });
+    drawAlarmInfoLine(dateList,valueList) {
+      // const dateList = list.map(function (item) {
+      //   return item[0];
+      // });
+      // const valueList = list.map(function (item) {
+      //   return item[1];
+      // });
       const option = {
         // Make gradient line here
         visualMap: [
@@ -445,7 +526,7 @@ export default {
             type: 'continuous',
             seriesIndex: 0,
             min: 0,
-            max: 400
+            max: 25
           },
         ],
         title: {
@@ -486,7 +567,7 @@ export default {
 
         ]
       };
-      this.drawPie.setOption(option);
+      this.drawLine.setOption(option);
     },
   }
 }
