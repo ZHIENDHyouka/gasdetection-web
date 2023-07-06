@@ -72,8 +72,7 @@
 </template>
 
 <script>
-    //exportedData  导出数据的方法
-    import {getAllDeviceName, getAllTemperatureData, getConditionData} from "@/utils/api";
+    import {getAllDeviceName, getAllTemperatureData, getConditionData, exportedData} from "@/utils/api";
 
     export default {
         name: "GasData",
@@ -203,8 +202,8 @@
                     inputPattern: /^\+?[1-9][0-9]*$/,
                     inputErrorMessage: '数据格式不正确'
                 }).then(({value}) => {
-                    console.log(value);
-                    console.log(this.tableData.length)
+                    console.log(value,this.queryGas, this.tableData.length);
+                    console.log(this.tableData)
                     let total = this.tableData.length
                     if (value > total) {
                         this.$message({
@@ -213,13 +212,15 @@
                         });
                     }
                     //导出方法
-                    /*exportedData(value).then(res=>{
-                        console.log(res)
-                        this.$message({
-                            type: 'success',
-                            message: '导出成功!'
-                        });
-                    })*/
+                    exportedData(value, this.queryGas, this.tableData).then(res => {
+                        console.log(res);
+                        if (res.code > 0) {
+                            this.$message({
+                                type: 'success',
+                                message: '导出成功!'
+                            });
+                        }
+                    })
 
 
                 }).catch(() => {

@@ -98,15 +98,17 @@ export function refuseManagerReview(uid) {
 }
 
 //需要导出数据的条数
-/*export function exportedData(number) {
+export function exportedData(number,gas,data) {
     return axios({
-        url:'/test',
+        url:'gas/download',
         method:'post',
         data:{
-            number:number
+            number:number,
+            gas:gas,
+            data:data
         }
     })
-}*/
+}
 
 //查询设备7小时内的使用数量
 export function getDeviceRunNumber(){
