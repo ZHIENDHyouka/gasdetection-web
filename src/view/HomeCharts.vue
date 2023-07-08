@@ -12,7 +12,7 @@
 
 <script>
 import {getDeviceRunNumber, getHarmfulGasAvgData, getRealTimeAlarmDataer} from "@/utils/api";
-import {inintWebSocket, sendInfo} from "@/utils/websocketUtil";
+import {sendInfo} from "@/utils/websocketUtil";
 
 export default {
   name: "HomeCharts",
@@ -42,33 +42,34 @@ export default {
   },
   methods: {
     connectWebSocket() {
-      if(!this.WebSocket) {
-        this.WebSocket = inintWebSocket();
+      if (!this.WebSocket) {
+        this.WebSocket =this.$store.state.websocket;
         this.rewriteWebSocketFunc();
+        this.websocketId = window.setInterval(function () {
+          sendInfo('1');
+          // console.log( this.WebSocket);
+        }, 2000);
       }
-      this.websocketId = window.setInterval(function () {
-        sendInfo('1');
-        // console.log( this.WebSocket);
-      }, 2000);
     },
     rewriteWebSocketFunc() {
       if (this.WebSocket) {
         this.WebSocket.onmessage = ((event) => {
-          if(JSON.parse(event.data)) {
-              const data = JSON.parse(event.data);
-              console.log(data);
-              this.dynamicDeviceNumber(JSON.parse(data.deviceNumberData));
-              this.dynamicAlarmInfo(JSON.parse(data.alarmInfoData).datetime,JSON.parse(data.alarmInfoData).number);
-              this.dynamicTemperatureDatar(data.temperatureData);
-              this.dynamicHumidityDatar(data.humidityData)
+          if (JSON.parse(event.data)) {
+            const data = JSON.parse(event.data);
+            // console.log(data);
+            this.dynamicDeviceNumber(JSON.parse(data.deviceNumberData));
+            this.dynamicAlarmInfo(JSON.parse(data.alarmInfoData).datetime, JSON.parse(data.alarmInfoData).number);
+            this.dynamicTemperatureDatar(data.temperatureData);
+            this.dynamicHumidityData(data.humidityData);
+            this.dynamicHarmfulGasData(data.HarmfulGasData);
           }
         })
       }
     },
-    dynamicDeviceNumber(data){
+    dynamicDeviceNumber(data) {
       const xData = (data.data.x).reverse();
       const yData = data.data.y;
-      if (this.drawCharts2){
+      if (this.drawCharts2) {
         this.drawCharts2.setOption({
           xAxis: [
             {
@@ -83,7 +84,7 @@ export default {
         })
       }
     },
-    dynamicAlarmInfo(date,value){
+    dynamicAlarmInfo(date, value) {
       if (this.drawLine) {
         //更新数据
         const xData = this.drawLine.getOption().xAxis[0].data;
@@ -106,7 +107,7 @@ export default {
         })
       }
     },
-    dynamicTemperatureDatar(value){
+    dynamicTemperatureDatar(value) {
       if (this.drawPanel1) {
         this.drawPanel1.setOption({
           series: [
@@ -129,8 +130,8 @@ export default {
         })
       }
     },
-    dynamicHumidityDatar(value){
-      if (this.drawPanel2){
+    dynamicHumidityData(value) {
+      if (this.drawPanel2) {
         this.drawPanel2.setOption({
           series: [{
             data: [
@@ -143,15 +144,44 @@ export default {
         })
       }
     },
+    dynamicHarmfulGasData(value) {
+      if (this.drawCharts1) {
+        const result = JSON.parse(value);
+        const source = this.drawCharts1.getOption().dataset[0].source;
+        source[0].splice(1,1);
+        source[0].push(result.datetime);
+        for (const sourceElement of source) {
+          for (const dataEle of result.data) {
+            if (dataEle.gasName === sourceElement[0]) {
+              sourceElement.splice(1, 1);
+              sourceElement.push(dataEle.data);
+            }
+          }
+        }
+        const pieData = this.calcPieData(source);
+        this.drawCharts1.setOption({
+          dataset: [
+            {
+              source: source,
+            }
+          ],
+          series: [
+            {
+              data: pieData,
+            }
+          ]
+        })
+      }
+    },
     getData() {
       this.getDeviceData();
       this.getAlarmData();
       this.getHarmfulGasData();
     },
-    getAlarmData(){
-      getRealTimeAlarmDataer().then((res)=>{
+    getAlarmData() {
+      getRealTimeAlarmDataer().then((res) => {
         if (res.code === 1) {
-          this.drawAlarmInfoLine(res.data.dateList,res.data.valueList);
+          this.drawAlarmInfoLine(res.data.dateList, res.data.valueList);
         } else if (res.code === 0) {
           this.$message.warning(res.msg);
         }
@@ -162,33 +192,67 @@ export default {
         const code = res.code;
         const msg = res.msg;
         if (code === 1) {
-          this.drawDeviceNumber(res.data.x.reverse(),res.data.y);
+          this.drawDeviceNumber(res.data.x.reverse(), res.data.y);
         } else if (code === 0) {
           this.$message.warning(msg);
         }
       })
     },
-    getHarmfulGasData(){
-      getHarmfulGasAvgData().then((res)=>{
-        console.log(res.data);
+    getHarmfulGasData() {
+      getHarmfulGasAvgData().then((res) => {
+        const dataList = res.data;
+        const sourceList = [];
+        const datetimeList = ['product'];
+        for (const item of dataList) {
+          datetimeList.push(item.datetime);
+        }
+        sourceList.push(datetimeList);
+        for (const item of dataList[0].data) {
+          sourceList.push([item.gasName]);
+        }
+        for (const dataEle of dataList) {
+          const element = dataEle.data
+          for (const ele of element) {
+            for (let i = 1; i < sourceList.length; i++) {
+              if (sourceList[i][0] === ele.gasName)
+                sourceList[i].push(ele.avg)
+            }
+          }
+        }
+        const pieData = this.calcPieData(sourceList);
+        // console.log(sourceList,pieData)
+        this.drawGasLineAndPie(sourceList, pieData);
       })
+    },
+    calcPieData(list) {
+      const pieDataList = [];
+      for (let i = 1; i < list.length; i++) {
+        let sum = 0;
+        for (let j = 1; j < list[i].length; j++) {
+          sum += list[i][j];
+        }
+        pieDataList.push({
+          name: list[i][0],
+          value: (sum / (list[i].length - 1)).toFixed(2),
+        })
+      }
+      return pieDataList;
     },
     drawInit() {
       this.drawCharts1 = this.$echarts.init(document.getElementById('charts1'));
       this.drawCharts2 = this.$echarts.init(document.getElementById('charts2'));
       this.drawPanel1 = this.$echarts.init(document.getElementById('chartPanel1'))
       this.drawPanel2 = this.$echarts.init(document.getElementById('chartPanel2'))
-      this.drawLine= this.$echarts.init(document.getElementById('drawLine'))
-      this.drawGasLineAndPie();
+      this.drawLine = this.$echarts.init(document.getElementById('drawLine'))
       this.drawTemperaturePanel();
       this.drawHumidityPanel();
     },
-    drawGasLineAndPie() {
+    drawGasLineAndPie(source, pieData) {
       const option = {
         title: {
           top: '10px',
           left: '5px',
-          text: '有害气体24小时内数据显示'
+          text: '有害气体实时数据显示'
         },
         legend: {},
         tooltip: {
@@ -196,42 +260,43 @@ export default {
           showContent: true,
         },
         dataset: {
-          source: [
-            ['product', '2012', '2013', '2014', '2015', '2016', '2017'],
-            ['Milk Tea', 56.5, 82.1, 88.7, 70.1, 53.4, 85.1],
-            ['Matcha Latte', 51.1, 51.4, 55.1, 53.3, 73.8, 68.7],
-            ['Cheese Cocoa', 40.1, 62.2, 69.5, 36.4, 45.2, 32.5],
-            ['Walnut Brownie', 25.2, 37.1, 41.2, 18, 33.9, 49.1]
-          ]
+          source: source,
+          //  source: [
+          //   ['product', '2012', '2013', '2014', '2015', '2016', '2017'],
+          //   ['Milk Tea', 56.5, 82.1, 88.7, 70.1, 53.4, 85.1],
+          //   ['Matcha Latte', 51.1, 51.4, 55.1, 53.3, 73.8, 68.7],
+          //   ['Cheese Cocoa', 40.1, 62.2, 69.5, 36.4, 45.2, 32.5],
+          //   ['Walnut Brownie', 25.2, 37.1, 41.2, 18, 33.9, 49.1]
+          // ]
         },
         xAxis: {type: 'category'},
         yAxis: {gridIndex: 0},
         grid: {top: '45%'},
         series: [
-          {
-            type: 'line',
-            smooth: true,
-            seriesLayoutBy: 'row',
-            emphasis: {focus: 'series'}
-          },
-          {
-            type: 'line',
-            smooth: true,
-            seriesLayoutBy: 'row',
-            emphasis: {focus: 'series'}
-          },
-          {
-            type: 'line',
-            smooth: true,
-            seriesLayoutBy: 'row',
-            emphasis: {focus: 'series'}
-          },
-          {
-            type: 'line',
-            smooth: true,
-            seriesLayoutBy: 'row',
-            emphasis: {focus: 'series'}
-          },
+          // {
+          //   type: 'line',
+          //   smooth: true,
+          //   seriesLayoutBy: 'row',
+          //   emphasis: {focus: 'series'}
+          // },
+          // {
+          //   type: 'line',
+          //   smooth: true,
+          //   seriesLayoutBy: 'row',
+          //   emphasis: {focus: 'series'}
+          // },
+          // {
+          //   type: 'line',
+          //   smooth: true,
+          //   seriesLayoutBy: 'row',
+          //   emphasis: {focus: 'series'}
+          // },
+          // {
+          //   type: 'line',
+          //   smooth: true,
+          //   seriesLayoutBy: 'row',
+          //   emphasis: {focus: 'series'}
+          // },
           {
             type: 'pie',
             id: 'pie',
@@ -243,18 +308,28 @@ export default {
             label: {
               formatter: '{b}: {@2012} ({d}%)'
             },
-            encode: {
-              itemName: 'product',
-              value: '2012',
-              tooltip: '2012'
-            }
+            data: pieData,
+            // data: [
+            //   { value: 1048, name: 'Milk Tea' },
+            //   { value: 735, name: 'Matcha Latte' },
+            //   { value: 484, name: 'Cheese Cocoa' },
+            //   { value: 300, name: 'Walnut Brownie' }
+            // ]
           }
         ]
       };
+      for (let i = 0; i < pieData.length; i++) {
+        option.series.push({
+          type: 'line',
+          smooth: true,
+          seriesLayoutBy: 'row',
+          emphasis: {focus: 'series'}
+        })
+      }
       this.drawCharts1.setOption(option);
       // this.drawCharts2.setOption(option);
     },
-    drawDeviceNumber(xData,yData) {
+    drawDeviceNumber(xData, yData) {
       const option = {
         title: {
           top: '10px',
@@ -511,7 +586,7 @@ export default {
       };
       this.drawPanel2.setOption(option);
     },
-    drawAlarmInfoLine(dateList,valueList) {
+    drawAlarmInfoLine(dateList, valueList) {
       // const dateList = list.map(function (item) {
       //   return item[0];
       // });

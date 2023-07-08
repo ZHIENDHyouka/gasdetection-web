@@ -28,6 +28,8 @@
 </template>
 
 <script>
+import {inintWebSocket, sendInfo} from "@/utils/websocketUtil";
+
 export default {
   name: "MainHome",
   data() {
@@ -35,14 +37,26 @@ export default {
       // activeIndexHorizontal: this.$router.options.routes[1].children[0].children[0].path,
       activeIndexHorizontal: this.$router.options.routes[1].children[0].path,
       username: '',
+      idInterval:null,
+      alarmNumber:0,
     }
   },
   created() {
     this.$router.replace("/HomeCharts");
+    this.$store.state.websocket=inintWebSocket();
   },
   mounted() {
     if (this.$route.query.username) window.localStorage.setItem("username", this.$route.query.username);
     this.username = window.localStorage.getItem("username");
+    this.getRealTimeAlarmNumber();
+  },
+  methods:{
+    getRealTimeAlarmNumber(){
+      this.$store.state.idInterval = window.setInterval(function () {
+        sendInfo('2');
+        // console.log( this.WebSocket);
+      }, 2000);
+    }
   }
 }
 </script>
