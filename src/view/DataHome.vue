@@ -30,7 +30,7 @@ export default {
   },
   mounted() {
     // this.$router.push({
-    //   path:'/data',
+    //   path:'/data',1
     // })
   },
   methods: {
