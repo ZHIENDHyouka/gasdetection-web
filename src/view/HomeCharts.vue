@@ -46,8 +46,10 @@ export default {
         this.WebSocket =this.$store.state.websocket;
         this.rewriteWebSocketFunc();
         this.websocketId = window.setInterval(function () {
-          sendInfo('1');
-          // console.log( this.WebSocket);
+          sendInfo(JSON.stringify({
+            code:'1',
+            data:null,
+          }));
         }, 2000);
       }
     },
@@ -56,12 +58,21 @@ export default {
         this.WebSocket.onmessage = ((event) => {
           if (JSON.parse(event.data)) {
             const data = JSON.parse(event.data);
-            // console.log(data);
-            this.dynamicDeviceNumber(JSON.parse(data.deviceNumberData));
-            this.dynamicAlarmInfo(JSON.parse(data.alarmInfoData).datetime, JSON.parse(data.alarmInfoData).number);
-            this.dynamicTemperatureDatar(data.temperatureData);
-            this.dynamicHumidityData(data.humidityData);
-            this.dynamicHarmfulGasData(data.HarmfulGasData);
+            const code = data.code;
+            if (code===1) {
+              this.dynamicDeviceNumber(JSON.parse(data.deviceNumberData));
+              this.dynamicAlarmInfo(JSON.parse(data.alarmInfoData).datetime, JSON.parse(data.alarmInfoData).number);
+              this.dynamicTemperatureDatar(data.temperatureData);
+              this.dynamicHumidityData(data.humidityData);
+              this.dynamicHarmfulGasData(data.HarmfulGasData);
+            }else if (code===2){
+              this.$store.state.alarmNumber=Number(data.alarmNumber);
+            }else if (code===3){
+              console.log(data);
+              if (data.data.length!==0) {
+                this.$store.state.alarmTableData=data.data;
+              }
+            }
           }
         })
       }

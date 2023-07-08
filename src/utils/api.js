@@ -133,3 +133,11 @@ export function getHarmfulGasAvgData(){
         method:'get',
     })
 }
+
+//查询初始化报警信息
+export function getAlarmInfoData(){
+    return axios({
+        url:'alarm/getDayAllAlarmInfo',
+        method:'get'
+    })
+}
