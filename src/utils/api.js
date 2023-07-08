@@ -141,3 +141,25 @@ export function getAlarmInfoData(){
         method:'get'
     })
 }
+
+//初始化设备信息
+export function getDeviceInfoData() {
+    return axios({
+        url:'device/getAllDeviceInfo',
+        method:'get'
+    })
+
+}
+
+//修改设备开关状态的方法
+export function updateDeviceState(state,serviceId) {
+    return axios({
+        url:'device/updateDeviceState',
+        method:'post',
+        data:{
+            state:state,
+            serviceId:serviceId
+        }
+    })
+
+}

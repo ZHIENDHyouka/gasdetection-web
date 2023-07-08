@@ -13,12 +13,12 @@
         </div>
         <div class="userBar">
 
-          <el-dropdown trigger="click">
+          <el-dropdown trigger="click" @command="showDeviceTable">
             <i class="el-icon-setting" style="padding-right: 10px;"></i>
             <el-dropdown-menu slot="dropdown">
-              <el-dropdown-item>退出</el-dropdown-item>
-              <el-dropdown-item>2</el-dropdown-item>
-              <el-dropdown-item>3</el-dropdown-item>
+              <el-dropdown-item command="1">退出</el-dropdown-item>
+              <el-dropdown-item command="2">设备管理</el-dropdown-item>
+              <el-dropdown-item command="a">3</el-dropdown-item>
             </el-dropdown-menu>
           </el-dropdown>
           <span>{{ username }}</span>
@@ -49,12 +49,41 @@
                      layout="total, sizes, prev, pager, next, jumper" :total="this.$store.state.alarmTableData.length">
       </el-pagination>
     </el-dialog>
+  
+    <el-dialog title="设备管理" :visible.sync="dialogDeviceTableVisible">
+      <el-table :data="DeviceData">
+        <el-table-column prop="id" label="序号" type="index" align="center" ></el-table-column>
+        <el-table-column prop="deviceName" label="设备编号" align="center"></el-table-column>
+        <el-table-column label="设备状态" align="center">
+          <template slot-scope="scope">
+            <el-tag type="success" v-if="scope.row.deviceStatus == 1">已开启</el-tag>
+            <el-tag type="danger" v-if="scope.row.deviceStatus == 0">已关闭</el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column label="操作" align="center">
+          <template slot-scope="scope">
+            <el-switch
+                  style="display: block"
+                  v-model="scope.row.deviceStatus"
+                  :active-value="1"
+                  :inactive-value="0"
+                  active-color="#13ce66"
+                  inactive-color="#ff4949"
+                  active-text="开"
+                  inactive-text="关"
+                  @change="changSwitchState($event,scope.row.id)"
+            >
+            </el-switch>
+          </template>
+        </el-table-column>
+      </el-table>
+    </el-dialog>
   </div>
 </template>
 
 <script>
 import {inintWebSocket, sendInfo} from "@/utils/websocketUtil";
-import {getAlarmInfoData} from "@/utils/api";
+import {getAlarmInfoData,getDeviceInfoData,updateDeviceState} from "@/utils/api";
 
 export default {
   name: "MainHome",
@@ -68,6 +97,13 @@ export default {
       alarmInfoData: [],
       currentPage: 1,
       pageSize: 10,
+      DeviceData: [{
+        id: '1',
+        deviceName: 'afdsfaf',
+        deviceStatus: '1'
+      }],
+      dialogDeviceTableVisible: false,
+      state: true
     }
   },
   created() {
@@ -141,6 +177,33 @@ export default {
     headCellStyle() {
       return "text-align:center;height:65px;background:#eef1f6;color:#606266;";
     },
+    //展示设备管理表格
+    showDeviceTable(command) {
+      console.log(command);
+      if (2==command){
+        getDeviceInfoData().then(res=>{
+          this.DeviceData=res.data;
+        })
+        this.dialogDeviceTableVisible=true;
+      }
+    },
+    //控制设备开关的方法
+    changSwitchState(state,deviceId){
+      console.log(state,deviceId)
+      updateDeviceState(state,deviceId).then(res=>{
+        if(0==res.code){
+          this.$message({
+            type: 'error',
+            message: '设备操作失败，请重试或联系管理员!'
+          });
+          return
+        }
+        this.$message({
+          type: 'success',
+          message: '操作成功'
+        });
+      })
+    }
   }
 }
 </script>
