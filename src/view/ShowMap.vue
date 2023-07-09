@@ -49,7 +49,8 @@ export default {
       viewMode:'2D',
       zoom:15,
       zooms:[3,20],
-      resizeEnable:true
+      resizeEnable:true,
+      markerPostion:[],
     }
   },
   created() {
@@ -65,8 +66,16 @@ export default {
     },
     getDeviceList() {
       getDeviceInfoData().then(res => {
-        console.log(res.data)
-        this.deviceOptions = res.data;
+        const list = res.data;
+        for (const listElement of list) {
+          //封装下拉框的数据
+          this.deviceOptions.push({
+            value:listElement.id,
+            label:listElement.deviceName
+          })
+          //封装点数据
+          listElement
+        }
       })
     },
     mapMouseEvent(e) {
