@@ -98,7 +98,9 @@ export default {
           login(this.loginForm).then(res => {
             const message = res.msg;
             const code = res.code;
-            const username  = res.data;
+            const username  = res.data.username;
+            const userId=res.data.managerId;
+            const userLevel=res.data.managerLevel;
             const flag = this.returnInfo(message, code);
             if (flag) {
               this.clearLoginForm();
@@ -109,7 +111,9 @@ export default {
                 // path:'/MainHome',
                 path:`${this.$router.options.routes[1].path}`,
                 query:{
-                  username: username
+                  username: username,
+                  userId:userId,
+                  userLevel:userLevel
                 }
               })
             }

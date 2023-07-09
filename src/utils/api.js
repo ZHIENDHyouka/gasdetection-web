@@ -161,5 +161,36 @@ export function updateDeviceState(state,serviceId) {
             serviceId:serviceId
         }
     })
+}
 
+//用户提交反馈
+export function submitFeedbackInfo(username,userId,describe) {
+    return axios({
+        url:'manager/submitFeedbackInfo',
+        method:'post',
+        data: {
+            userId:userId,
+            userName:username,
+            problemDescribe:describe
+        }
+    })
+}
+
+//获取用户反馈
+export function getFeedbackInfoData() {
+    return axios({
+        url:'manager/getFeedbackInfoData',
+        method:'get'
+    })
+}
+
+//更新用户反馈
+export function solvingProblems(id){
+    return axios({
+        url:'manager/solvingProblems',
+        method:'post',
+        data:{
+            id:id
+        }
+    })
 }

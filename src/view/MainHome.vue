@@ -78,12 +78,52 @@
         </el-table-column>
       </el-table>
     </el-dialog>
+  
+    <el-dialog title="反馈信息" :visible.sync="dialogFeedbackFormVisible">
+      <el-form :model="ruleForm" :rules="rules" ref="ruleForm" class="demo-ruleForm">
+        <el-form-item prop="desc">
+          <el-input type="textarea" :rows="8" v-model="ruleForm.desc"></el-input>
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="dialogFeedbackFormVisible = false">取 消</el-button>
+        <el-button type="primary" @click="submitFeedback">提交</el-button>
+      </div>
+    </el-dialog>
+  
+    <el-dialog title="收货地址" :visible.sync="dialogUserFeedbackTableVisible">
+      <el-table :data="feedbackData">
+        <el-table-column prop="id" label="序号" type="index" align="center" ></el-table-column>
+        <el-table-column prop="userName" label="申请用户" align="center"></el-table-column>
+        <el-table-column prop="submitTime" label="申请时间" align="center"></el-table-column>
+        <el-table-column label="反馈问题" align="center">
+          <template slot-scope="scope">
+            <el-link type="primary" @click="details(scope.row.problemDescribe)">详情</el-link>
+          </template>
+        </el-table-column>
+        <el-table-column label="操作" align="center">
+          <template slot-scope="scope">
+            <div v-if="scope.row.status === 1">已解决</div>
+            <el-button type="primary" @click="solvingProblems(scope.row.id)" v-if="scope.row.status === 0">解决</el-button>
+          </template>
+        </el-table-column>
+      </el-table>
+    </el-dialog>
+  
+    F
+    <el-dialog title="反馈问题" :visible.sync="detailsFeedbackDialogVisible" width="30%" >
+      <span>{{feedbackIssues}}</span>
+      <span slot="footer" class="dialog-footer">
+    <el-button type="primary" @click="detailsFeedbackDialogVisible = false" >确 定</el-button>
+  </span>
+    </el-dialog>
+    
   </div>
 </template>
 
 <script>
 import {sendInfo} from "@/utils/websocketUtil";
-import {getAlarmInfoData,getDeviceInfoData,updateDeviceState} from "@/utils/api";
+import {getAlarmInfoData,getDeviceInfoData,updateDeviceState,submitFeedbackInfo,getFeedbackInfoData,solvingProblems} from "@/utils/api";
 
 export default {
   name: "MainHome",
@@ -93,24 +133,41 @@ export default {
       showAlarmTable: false,
       activeIndexHorizontal: this.$router.options.routes[1].children[0].path,
       username: '',
+      userId:'',
+      userLevel:'',
       tableIntervalId: null,
       alarmNumber: 0,
       alarmInfoData: [],
       currentPage: 1,
       pageSize: 10,
-      DeviceData: [{
-        id: '1',
-        deviceName: 'afdsfaf',
-        deviceStatus: '1'
-      }],
+      DeviceData: [],
       dialogDeviceTableVisible: false,
-      state: true
+      state: true,
+      
+      dialogFeedbackFormVisible: false,
+      ruleForm: {
+        desc: ''
+      },
+      rules: {
+        desc: [
+          { required: true, message: '请输入所要反馈的问题', trigger: 'blur' }
+        ]
+      },
+  
+      feedbackData: [],
+      dialogUserFeedbackTableVisible: false,
+      detailsFeedbackDialogVisible: false,
+      feedbackIssues:''
     }
   },
   created() {
     if (this.$route.query.username) window.localStorage.setItem("username", this.$route.query.username);
+    if (this.$route.query.userId) window.localStorage.setItem("userId", this.$route.query.userId);
+    if (this.$route.query.userLevel) window.localStorage.setItem("userLevel", this.$route.query.userLevel);
     // if (this.$store.state.username) window.localStorage.setItem("username", this.$store.state.username);
     this.username = window.localStorage.getItem("username");
+    this.userId = window.localStorage.getItem("userId");
+    this.userLevel = window.localStorage.getItem("userLevel");
     // this.$store.state.websocket = inintWebSocket();
   },
   mounted() {
@@ -192,6 +249,17 @@ export default {
           this.DeviceData=res.data;
         })
         this.dialogDeviceTableVisible=true;
+      }else if ('3'===command) {
+        if ('2'===this.userLevel){
+          this.ruleForm.desc='';
+          this.dialogFeedbackFormVisible=true;
+        }
+        if ('1'===this.userLevel){
+          getFeedbackInfoData().then(res=>{
+            this.feedbackData=res.data
+          })
+          this.dialogUserFeedbackTableVisible=true;
+        }
       }
     },
     //控制设备开关的方法
@@ -209,7 +277,50 @@ export default {
           message: '操作成功'
         });
       })
+    },
+    //提交反馈
+    submitFeedback(){
+      console.log(this.ruleForm.desc)
+      submitFeedbackInfo(this.username,this.userId,this.ruleForm.desc).then(res=>{
+        if(0==res.code){
+          this.$message({
+            type: 'error',
+            message: '提交失败，请重试或联系管理员!'
+          });
+          return
+        }
+        this.$message({
+          type: 'success',
+          message: '提交成功'
+        });
+      })
+      this.dialogFeedbackFormVisible = false
+    },
+    //展示反馈的详细信息
+    details(problemDescribe){
+      this.feedbackIssues=problemDescribe;
+      this.detailsFeedbackDialogVisible=true;
+    },
+    //解决问题
+    solvingProblems(id){
+      solvingProblems(id).then(res=>{
+        if(0==res.code){
+          this.$message({
+            type: 'error',
+            message: '操作失败，请重试或联系管理员!'
+          });
+          return
+        }
+        this.$message({
+          type: 'success',
+          message: '操作成功'
+        });
+        getFeedbackInfoData().then(res=>{
+          this.feedbackData=res.data
+        })
+      })
     }
+    
   }
 }
 </script>
