@@ -12,76 +12,94 @@ import InformationFile from "@/view/InformationFile";
 import ShowMap from "@/view/ShowMap";
 
 Vue.use(VueRouter)
-const routes = [
-    {
-        path: '/',
-        name: 'login',
-        component: LoginManager,
-        hidden: true
-    },
-    {
-        path: '/MainHome',
-        name: 'MainHome',
-        component: MainHome,
-        children: [
+const router = new VueRouter({
+        routes: [
             {
-                path: '/HomeCharts',
-                name: '首页',
-                component: HomeCharts,
+                path: '/',
+                name: 'login',
+                component: LoginManager,
+                hidden: true
             },
             {
-                path: '/DataHome',
-                name: '数据展示',
-                component: DataHome,
-                redirect:'/data',
+                path: '/MainHome',
+                name: 'MainHome',
+                component: MainHome,
                 children: [
                     {
-                        path: '/data',
-                        name: '基本数据',
-                        component: GasData,
+                        path: '/HomeCharts',
+                        name: '首页',
+                        component: HomeCharts,
                     },
-                ]
-            },
-            {
-                path: '/ManagerHome',
-                name: '用户管理',
-                component: ManagerHome,
-                redirect: '/AccountManage',
-                children: [
                     {
-                        path: '/AccountManage',
-                        name: '账号管理',
-                        component: AccountManage,
-                    },{
-                        path: '/RegisterManage',
-                        name:'注册审核',
-                        component: RegisterManage
+                        path: '/DataHome',
+                        name: '数据展示',
+                        component: DataHome,
+                        redirect: '/data',
+                        children: [
+                            {
+                                path: '/data',
+                                name: '基本数据',
+                                component: GasData,
+                            },
+                        ]
+                    },
+                    {
+                        path: '/ManagerHome',
+                        name: '用户管理',
+                        component: ManagerHome,
+                        redirect: '/AccountManage',
+                        children: [
+                            {
+                                path: '/AccountManage',
+                                name: '账号管理',
+                                component: AccountManage,
+                            }, {
+                                path: '/RegisterManage',
+                                name: '注册审核',
+                                component: RegisterManage
+                            }
+                        ]
+                    },
+                    {
+                        path: '/InformationFile',
+                        name: '资料信息',
+                        component: InformationFile,
+                    },
+                    {
+                        path: '/ShowMap',
+                        name: '地图',
+                        component: ShowMap,
                     }
                 ]
-            },
-            {
-                path: '/InformationFile',
-                name: '资料信息',
-                component: InformationFile,
-            },
-            {
-                path: '/ShowMap',
-                name: '地图',
-                component: ShowMap,
-            }
-        ]
-    },
+            }]
+        }
+);
 
-]
 //解决冗余导航
 const RouterPush = VueRouter.prototype.push
-VueRouter.prototype.push = function push (to) {
+VueRouter.prototype.push = function push(to) {
     return RouterPush.call(this, to).catch(err => err)
 }
 const RouterReplace = VueRouter.prototype.replace
-VueRouter.prototype.replace = function replace (to) {
+VueRouter.prototype.replace = function replace(to) {
     return RouterReplace.call(this, to).catch(err => err)
 }
-export default new VueRouter({
-    routes
-})
+//配置路由守卫
+// router.beforeEach((to, from, next) => {
+//     console.log(to.path)
+//     // console.log(from.path)
+//     const username = window.localStorage.getItem('username')
+//     // console.log(username)
+//     if (to.path==='/'&&username==='') {
+//         console.log(1)
+//         next('/')
+//     }else if (to.path==='/'&&username!=='') {
+//         console.log(2)
+//         next('/HomeCharts')
+//     }
+// })
+
+
+export default router
+
+

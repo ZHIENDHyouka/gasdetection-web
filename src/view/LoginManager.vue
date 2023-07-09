@@ -99,13 +99,12 @@ export default {
             const message = res.msg;
             const code = res.code;
             const username  = res.data;
-            console.log(res);
             const flag = this.returnInfo(message, code);
-            // window.localStorage.setItem("userId",res.data);
             if (flag) {
               this.clearLoginForm();
-              // this.$router.replace('/home');
               //页面跳转
+              // this.$store.state.username=username;
+              // this.$router.replace(`${this.$router.options.routes[1].path}`);
               this.$router.push({
                 // path:'/MainHome',
                 path:`${this.$router.options.routes[1].path}`,
@@ -135,11 +134,9 @@ export default {
             }
           });
         } else {
-          // console.log('error submit!!');
           return false;
         }
       });
-      // this.showRegisterOrLogin=!this.showRegisterOrLogin;
     },
     clearLoginForm() {
       this.loginForm.username = '';

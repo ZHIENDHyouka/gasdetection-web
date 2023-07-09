@@ -16,9 +16,9 @@
           <el-dropdown trigger="click" @command="showDeviceTable">
             <i class="el-icon-setting" style="padding-right: 10px;"></i>
             <el-dropdown-menu slot="dropdown">
-              <el-dropdown-item command="1">退出</el-dropdown-item>
               <el-dropdown-item command="2">设备管理</el-dropdown-item>
-              <el-dropdown-item command="a">3</el-dropdown-item>
+              <el-dropdown-item command="3">用户反馈</el-dropdown-item>
+              <el-dropdown-item command="1">退出</el-dropdown-item>
             </el-dropdown-menu>
           </el-dropdown>
           <span>{{ username }}</span>
@@ -56,8 +56,8 @@
         <el-table-column prop="deviceName" label="设备编号" align="center"></el-table-column>
         <el-table-column label="设备状态" align="center">
           <template slot-scope="scope">
-            <el-tag type="success" v-if="scope.row.deviceStatus == 1">已开启</el-tag>
-            <el-tag type="danger" v-if="scope.row.deviceStatus == 0">已关闭</el-tag>
+            <el-tag type="success" v-if="scope.row.deviceStatus === 1">已开启</el-tag>
+            <el-tag type="danger" v-if="scope.row.deviceStatus === 0">已关闭</el-tag>
           </template>
         </el-table-column>
         <el-table-column label="操作" align="center">
@@ -82,11 +82,12 @@
 </template>
 
 <script>
-import {inintWebSocket, sendInfo} from "@/utils/websocketUtil";
+import {sendInfo} from "@/utils/websocketUtil";
 import {getAlarmInfoData,getDeviceInfoData,updateDeviceState} from "@/utils/api";
 
 export default {
   name: "MainHome",
+
   data() {
     return {
       showAlarmTable: false,
@@ -107,12 +108,13 @@ export default {
     }
   },
   created() {
-    this.$router.replace("/HomeCharts");
-    this.$store.state.websocket = inintWebSocket();
+    if (this.$route.query.username) window.localStorage.setItem("username", this.$route.query.username);
+    // if (this.$store.state.username) window.localStorage.setItem("username", this.$store.state.username);
+    this.username = window.localStorage.getItem("username");
+    // this.$store.state.websocket = inintWebSocket();
   },
   mounted() {
-    if (this.$route.query.username) window.localStorage.setItem("username", this.$route.query.username);
-    this.username = window.localStorage.getItem("username");
+    this.$router.replace("/HomeCharts");
     this.getRealTimeAlarmNumber();
   },
   methods: {
@@ -179,8 +181,13 @@ export default {
     },
     //展示设备管理表格
     showDeviceTable(command) {
-      console.log(command);
-      if (2==command){
+      if (command==='1'){
+        window.localStorage.setItem('username','')
+        this.$router.push({
+          path:'/'
+        })
+        this.$message.success('退出成功!');
+      }else if ('2'===command){
         getDeviceInfoData().then(res=>{
           this.DeviceData=res.data;
         })
@@ -189,7 +196,6 @@ export default {
     },
     //控制设备开关的方法
     changSwitchState(state,deviceId){
-      console.log(state,deviceId)
       updateDeviceState(state,deviceId).then(res=>{
         if(0==res.code){
           this.$message({

@@ -7,6 +7,7 @@ export default new Vuex.Store({
         idInterval:null,
         alarmNumber:0,
         alarmTableData:[],
+        username:null,
     },
     mutations:{
 
