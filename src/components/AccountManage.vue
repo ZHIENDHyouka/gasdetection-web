@@ -141,7 +141,7 @@ export default {
         const options={
           showClose: true,
           message: msg,
-          duration:1000
+          duration:2000
         }
         if (code===1) {
           this.$message.success(options);

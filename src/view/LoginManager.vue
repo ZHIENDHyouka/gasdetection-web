@@ -152,10 +152,16 @@ export default {
     },
     returnInfo(message, code) {
       if (code === 1) {
-        this.$message.success(message);
+        this.$message.success({
+          message:message,
+          duration:1000,
+        });
         return true;
       } else {
-        this.$message.error(message);
+        this.$message.error({
+          message:message,
+          duration:1000,
+        });
         return false;
       }
     }

@@ -194,3 +194,11 @@ export function solvingProblems(id){
         }
     })
 }
+
+//获取气体列表
+export function getGasNameList(){
+    return axios({
+        url:'statistic/getGasNameList',
+        method:'get'
+    })
+}

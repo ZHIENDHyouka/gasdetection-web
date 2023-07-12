@@ -54,7 +54,8 @@ export function sendInfo(message){
 export function closeConnection(){
     if (websocket) {
         websocket.onclose();
+        return null;
     }
-    return null;
+
 }
 

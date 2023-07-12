@@ -8,8 +8,8 @@ import ManagerHome from "@/view/ManagerHome";
 import AccountManage from "@/components/AccountManage";
 import RegisterManage from "@/components/RegisterManage";
 import MainHome from "@/view/MainHome";
-import InformationFile from "@/view/InformationFile";
 import ShowMap from "@/view/ShowMap";
+import StatisticCharts from "@/view/StatisticCharts";
 
 Vue.use(VueRouter)
 const router = new VueRouter({
@@ -61,9 +61,9 @@ const router = new VueRouter({
                         ]
                     },
                     {
-                        path: '/InformationFile',
-                        name: '资料信息',
-                        component: InformationFile,
+                        path: '/StatisticCharts',
+                        name: '统计图表',
+                        component: StatisticCharts,
                     },
                     {
                         path: '/ShowMap',
