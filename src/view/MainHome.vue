@@ -5,7 +5,7 @@
         <div style="float: left;display: inline">
           <el-menu :default-active="activeIndexHorizontal" class="el-menu-demo" mode="horizontal" router
             active-text-color="rgb(110,0,0)">
-            <el-menu-item v-for="(item, index) in this.$router.options.routes[1].children" :key="index" :index="item.path">
+            <el-menu-item v-for="(item, index) in this.navigation" :key="index" :index="item.path">
               {{ item.name }}
             </el-menu-item>
           </el-menu>
@@ -117,6 +117,7 @@ export default {
 
   data() {
     return {
+      navigation:[],
       showAlarmTable: false,
       activeIndexHorizontal: this.$router.options.routes[1].children[0].path,
       username: '',
@@ -159,8 +160,18 @@ export default {
   mounted() {
     this.$router.replace("/HomeCharts");
     this.getRealTimeAlarmNumber();
+    this.menuBarJudgment();
   },
   methods: {
+    menuBarJudgment(){
+      if (this.userLevel==2){
+        this.navigation =this.$router.options.routes[1].children
+        this.navigation.splice(2,1)
+      }else {
+        this.navigation=this.$router.options.routes[1].children;
+      }
+      
+    },
     getRealTimeAlarmNumber() {
       if (this.$store.state.websocket) {
         this.$store.state.idInterval = window.setInterval(function () {

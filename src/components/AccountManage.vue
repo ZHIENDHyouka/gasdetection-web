@@ -79,12 +79,12 @@
               v-show="scope.row.accountStatus===0&&scope.row.managerLevel!==1"
               @click="changeAcountStatus(scope.row.managerId,1)"
               type="success"
-              size="mini">启用</el-button>
+              size="mini" plain>启用</el-button>
           <el-button
               v-show="scope.row.accountStatus===1&&scope.row.managerLevel!==1"
               size="mini"
               @click="changeAcountStatus(scope.row.managerId,0)"
-              type="danger">禁用</el-button>
+              type="danger" plain>禁用</el-button>
         </template>
       </el-table-column>
     </el-table>
