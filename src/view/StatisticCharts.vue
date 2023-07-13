@@ -178,7 +178,7 @@ export default {
         }
         const gasName = this.menuListData[this.gasIndex-1].name;
         //封装数据
-        const param = {
+        var param = {
           name: gasName,
           satisticValue: this.satisticValue,
           datetimeUnit: this.value,
@@ -187,12 +187,51 @@ export default {
         }
         getStatisticData(param).then(res => {
           if (item.chartType===''){
-            //当前选择气体的所有图像数据
+            param.chartType='line1';
+            getStatisticData(param).then(res => {
+              if (res.code===1) {
+                const dataList = res.data.dataList;
+                const dateList = res.data.dateList;
+                console.log(dataList)
+                console.log(dateList)
+                //渲染图像
+                this.drawGasLine1({
+                  dataList:dataList,
+                  dateList:dateList,
+                })
+              }else {
+                this.$message.error({
+                  message:'为获取到数据',
+                  duration:2000
+                })
+              }
+            })
+            param.chartType='line2'
+            getStatisticData(param).then(res => {
+              if (res.code===1) {
+                const dataList = res.data.dataList;
+                const dateList = res.data.dateList;
+                console.log(dataList)
+                console.log(dateList)
+                //渲染图像
+                this.drawGasLine1({
+                  dataList:dataList,
+                  dateList:dateList,
+                })
+              }else {
+                this.$message.error({
+                  message:'为获取到数据',
+                  duration:2000
+                })
+              }
+            })
           }else if (item.chartType==='line1'){
             //基本折线图
             if (res.code===1) {
               const dataList = res.data.dataList;
               const dateList = res.data.dateList;
+              console.log(dataList)
+              console.log(dateList)
               //渲染图像
               this.drawGasLine1({
                 dataList:dataList,
@@ -206,6 +245,22 @@ export default {
             }
           }else if (item.chartType==='line2') {
             //面积图
+            if (res.code===1) {
+              const dataList = res.data.dataList;
+              const dateList = res.data.dateList;
+              console.log(dataList)
+              console.log(dateList)
+              //渲染图像
+              this.drawGasLine2({
+                dataList:dataList,
+                dateList:dateList,
+              })
+            }else {
+              this.$message.error({
+                message:'为获取到数据',
+                duration:2000
+              })
+            }
           }
         })
       } else {
@@ -215,7 +270,34 @@ export default {
         })
       }
 
-    },
+    }
+    //图像渲染
+    /*imageRendering(drawGasLine,res){
+      if (res.code===1) {
+        const dataList = res.data.dataList;
+        const dateList = res.data.dateList;
+        console.log(dataList)
+        console.log(dateList)
+        //渲染图像
+        if ('drawGasLine1'===drawGasLine){
+          this.drawGasLine1({
+            dataList:dataList,
+            dateList:dateList,
+          })
+        }
+        if ('drawGasLine2'===drawGasLine){
+          this.drawGasLine2({
+            dataList:dataList,
+            dateList:dateList,
+          })
+        }
+      }else {
+        this.$message.error({
+          message:'为获取到数据',
+          duration:2000
+        })
+      }
+    }*/,
     getDrawInstance(id) {
       const instance = this.$echarts.init(document.getElementById(id));
       if (instance) return instance;
