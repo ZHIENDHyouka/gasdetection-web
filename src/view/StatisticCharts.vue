@@ -2,9 +2,9 @@
   <div id="StatisticCharts">
     <div class="asideMenu">
       <el-menu
-          :default-active="this.gasIndex"
-          style=" border-radius: 15px; ">
-        <el-menu-item @click="queryChartsData(null,{index:this.gasIndex,flag:0})"
+          default-active="1"
+          style=" border-radius: 15px;">
+        <el-menu-item @click="queryChartsData({index:item.index,flag:0,chartType:''})"
                       style="height: 50px;
             margin-top:10px;text-align: center;width: 150px;padding-left: 15px;padding-right: 25px"
                       :index="item.index" v-for="(item,index) in menuListData" :key="index">
@@ -15,38 +15,86 @@
     </div>
     <div class="chartsContainer">
       <!--基本折线图-->
-      <div></div>
-      <div class="selectStyle">
-        <span>查询时间：</span>
-        <el-select v-model="value" placeholder="请选择" style="width: 75px;height: 30px"
-                   @change="queryChartsData($event,{index:null,flag:1})">
-          <el-option
-              v-for="item in options"
-              :key="item.value"
-              :label="item.label"
-              :value="item.value"
-              >
-          </el-option>
-        </el-select>
-        <span style="margin-left: 10px">统计标准：</span>
-        <el-select v-model="satisticValue" placeholder="请选择" style="width: 100px;height: 30px"
-                   @change="queryChartsData($event,{index:null,flag:1})">
-          <el-option
-              v-for="item in statisOptions"
-              :key="item.value"
-              :label="item.label"
-              :value="item.value"
-              >
-          </el-option>
-        </el-select>
+      <div>
+        <div class="selectStyle">
+          <span>时间单位：</span>
+<!--          @change="changeDateTimeUint"-->
+          <el-select v-model="value" placeholder="请选择" style="width: 75px;height: 30px" >
+            <el-option
+                v-for="item in options"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value">
+            </el-option>
+          </el-select>
+          <span style="margin-left: 10px">统计标准：</span>
+          <el-select v-model="satisticValue" placeholder="请选择" style="width: 100px;height: 30px">
+            <el-option
+                v-for="item in statisOptions"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value"
+            >
+            </el-option>
+          </el-select>
+          <span style="margin-left: 10px">时间范围选择：</span>
+          <el-date-picker
+              v-model="datetime"
+              :type="datePickerType"
+              range-separator="至"
+              start-placeholder="开始日期"
+              end-placeholder="结束日期"
+              placeholder="选择日期"
+              value-format="yyyy-MM-dd HH:mm:ss">
+          </el-date-picker>
+          <el-button type="primary" round style="margin-left: 10px"
+                     @click="queryChartsData({flag:1,chartType:'line1'})">查询</el-button>
+        </div>
+        <div id="drawLine1" class="lineStyle"></div>
       </div>
-      <div id="drawLine1" class="lineStyle"></div>
+      <div>
+        <div class="selectStyle">
+          <span>时间单位：</span>
+          <!--          @change="changeDateTimeUint"-->
+          <el-select v-model="value" placeholder="请选择" style="width: 75px;height: 30px" >
+            <el-option
+                v-for="item in options"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value">
+            </el-option>
+          </el-select>
+          <span style="margin-left: 10px">统计标准：</span>
+          <el-select v-model="satisticValue" placeholder="请选择" style="width: 100px;height: 30px">
+            <el-option
+                v-for="item in statisOptions"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value"
+            >
+            </el-option>
+          </el-select>
+          <span style="margin-left: 10px">时间范围选择：</span>
+          <el-date-picker
+              v-model="datetime"
+              :type="datePickerType"
+              range-separator="至"
+              start-placeholder="开始日期"
+              end-placeholder="结束日期"
+              placeholder="选择日期"
+              value-format="yyyy-MM-dd HH:mm:ss">
+          </el-date-picker>
+          <el-button type="primary" round style="margin-left: 10px"
+                     @click="queryChartsData({flag:1,chartType:'line1'})">查询</el-button>
+        </div>
+        <div id="drawLine2" class="lineStyle"></div>
+      </div>
     </div>
   </div>
 </template>
 
 <script>
-import {getGasNameList} from "@/utils/api";
+import {getGasNameList, getStatisticData} from "@/utils/api";
 
 export default {
   name: "StatisticCharts",
@@ -66,16 +114,21 @@ export default {
       }, {
         value: 'day',
         label: '日'
-      }],
-      statisOptions:[{
+      },
+      //   {
+      //   value: 'custom',
+      //   label: '时间均摊'
+      // }
+      ],
+      statisOptions: [{
         value: 'average',
         label: '平均数'
       }, {
-        value: 'median',
+          value: 'median',
         label: '中位数'
       }],
-      value: 'year',
-      satisticValue:'average',
+      value: 'day',
+      satisticValue: 'average',
       isCollapse: true,
       menuListData: [
         {
@@ -94,41 +147,73 @@ export default {
           name: 'so2',
         }
       ],
-      gasIndex:'1',
+      gasIndex: 1,
+      datetime: [],
+      datePickerType: 'datetimerange'
     }
   },
   mounted() {
     this.drawInit();
     this.getGasName();
+    this.setNowMothRange();
+    this.queryChartsData({index:this.gasIndex,flag:0,chartType:''})
   },
   methods: {
-    getGasName(){
-      getGasNameList().then(res=>{
-        if (res.data&&res.data.length>0){
-          this.menuListData=res.data;
-        }else {
+    getGasName() {
+      getGasNameList().then(res => {
+        if (res.data && res.data.length > 0) {
+          this.menuListData = res.data;
+        } else {
           this.$message.error(res.msg);
         }
       })
     },
-    queryChartsData(event,item) {
-      if (item.flag===0) {
-        //切换查询图表类型
-        this.gasIndex = item.index;
-        // if (this.gasIndex === '1') {
-        //   return;
-        // }
-        this.value = 'year';
-        this.satisticValue = 'average'
+    queryChartsData(item) {
+      if (this.datetime && this.datetime.length > 0) {
+        if (item.flag === 0) {
+          //切换查询图表类型
+          this.gasIndex = Number(item.index)+1;
+          this.value = 'day';
+          this.satisticValue = 'average'
+        }
+        const gasName = this.menuListData[this.gasIndex-1].name;
+        //封装数据
+        const param = {
+          name: gasName,
+          satisticValue: this.satisticValue,
+          datetimeUnit: this.value,
+          chartType: item.chartType,
+          datetime: this.datetime,
+        }
+        getStatisticData(param).then(res => {
+          if (item.chartType===''){
+            //当前选择气体的所有图像数据
+          }else if (item.chartType==='line1'){
+            //基本折线图
+            if (res.code===1) {
+              const dataList = res.data.dataList;
+              const dateList = res.data.dateList;
+              //渲染图像
+              this.drawGasLine1({
+                dataList:dataList,
+                dateList:dateList,
+              })
+            }else {
+              this.$message.error({
+                message:'为获取到数据',
+                duration:2000
+              })
+            }
+          }else if (item.chartType==='line2') {
+            //面积图
+          }
+        })
+      } else {
+        this.$message.error({
+          message: '请将查询信息填写完整!',
+          duration: 2000,
+        })
       }
-      const gasName = this.menuListData[Number(this.gasIndex) - 1].name;
-      //封装数据
-      const param={
-        name:gasName,
-        satisticValue:this.satisticValue,
-        datetime:this.value,
-      }
-      console.log(param);
 
     },
     getDrawInstance(id) {
@@ -142,13 +227,15 @@ export default {
     },
     drawInit() {
       this.drawLine1 = this.getDrawInstance('drawLine1');
+      this.drawLine2 = this.getDrawInstance('drawLine2');
       const data = {
-        dataList: [110, 111, 1112],
+        dataList: [110, 111, 112],
         dateList: ["2000-06-05", "2000-06-06", "2000-06-07"],
       }
-      this.drawTempertureLine1(data);
+      this.drawGasLine2(data);
     },
-    drawTempertureLine1(data) {
+    //基本折线图
+    drawGasLine1(data) {
       if (this.drawLine1) {
         const option = {
           visualMap: [
@@ -163,23 +250,33 @@ export default {
           title: [
             {
               left: 'center',
-              text: '温度基本数据折线图'
+              text: `${this.menuListData[this.gasIndex-1].name}基本数据折线图`
             },
           ],
           tooltip: {
             trigger: 'axis'
           },
-          xAxis: [
-            {
-              data: data.dateList
+          toolbox: {
+            feature: {
+              // restore: {},
+              saveAsImage: {}
+            }
+          },
+          xAxis: {
+              data: data.dateList,
+              boundaryGap: false,
             },
-          ],
-          yAxis: [
-            {},
+          yAxis: {},
+          dataZoom: [
+            {
+              type: 'inside',
+              start: 0,
+              end: 10,
+            },
           ],
           grid: [
             {
-              bottom: '60%'
+              bottom: '15%'
             },
           ],
           series: [
@@ -191,8 +288,97 @@ export default {
           ]
         };
         this.drawLine1.setOption(option);
-
       }
+    },
+    //面积图
+    drawGasLine2(data){
+      const option = {
+        tooltip: {
+          trigger: 'axis',
+          position: function (pt) {
+            return [pt[0], '10%'];
+          }
+        },
+        title: {
+          left: 'center',
+          text: `${this.menuListData[this.gasIndex-1].name}面积图`
+        },
+        toolbox: {
+          feature: {
+            restore: {},
+            saveAsImage: {}
+          }
+        },
+        xAxis: {
+          type: 'category',
+          boundaryGap: false,
+          data: data.dateList
+        },
+        yAxis: {
+          type: 'value',
+          boundaryGap: [0, '100%']
+        },
+        dataZoom: [
+          {
+            type: 'inside',
+            start: 0,
+            end: 10
+          },
+          {
+            start: 0,
+            end: 10
+          }
+        ],
+        series: [
+          {
+            name: `${this.menuListData[this.gasIndex].name}`,
+            type: 'line',
+            symbol: 'none',
+            sampling: 'lttb',
+            itemStyle: {
+              color: 'rgb(255, 70, 131)'
+            },
+            areaStyle: {
+              color: new this.$echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                {
+                  offset: 0,
+                  color: 'rgb(255, 158, 68)'
+                },
+                {
+                  offset: 1,
+                  color: 'rgb(255, 70, 131)'
+                }
+              ])
+            },
+            data: data.dataList
+          }
+        ]
+      };
+      this.drawLine2.setOption(option);
+    },
+    // changeDateTimeUint(){
+    //   if (this.value==='year'){
+    //     this.datePickerType='daterange';
+    //   }else if (this.value==='month'){
+    //     this.datePickerType='daterange';
+    //   }else if (this.value==='day'){
+    //     this.datePickerType='daterange';
+    //   }else if (this.value==='custom'){
+    //     this.datePickerType==='datetimerange'
+    //   }
+    // },
+    setNowMothRange() {
+      this.datetime = [];
+      const now = new Date().getTime();
+      this.datetime.push(this.getDataTimeFormat(now - 1000 * 60 * 60 * 24 * 30));
+      this.datetime.push(this.getDataTimeFormat(now));
+    },
+    getDataTimeFormat(n) {
+      const now = new Date(n),
+          y = now.getFullYear(),
+          m = now.getMonth() + 1,
+          d = now.getDate();
+      return y + "-" + (m < 10 ? "0" + m : m) + "-" + (d < 10 ? "0" + d : d) + " " + now.toTimeString().substr(0, 8);
     }
   }
 }
@@ -224,16 +410,16 @@ export default {
   margin-left: 170px;
 }
 
-.lineStyle{
+.lineStyle {
   margin-top: 20px;
-  height: 800px;
-  width: 100%;
+  height: 600px;
+  width: 95%;
 }
 
-.selectStyle{
-  margin-top: 10px;
+.selectStyle {
+  margin-top: 15px;
   font-size: 14px;
-  margin-left: 10px;
+  margin-left: 100px;
 }
 
 </style>

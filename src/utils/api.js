@@ -202,3 +202,12 @@ export function getGasNameList(){
         method:'get'
     })
 }
+
+//获取统计数据
+export  function  getStatisticData(param){
+    return axios({
+        url:'statistic/getStatisticData',
+        method:'post',
+        data:param
+    })
+}
