@@ -147,7 +147,7 @@ export default {
           name: 'so2',
         }
       ],
-      gasIndex: 1,
+      gasIndex: 0,
       datetime: [],
       datePickerType: 'datetimerange'
     }
@@ -172,11 +172,13 @@ export default {
       if (this.datetime && this.datetime.length > 0) {
         if (item.flag === 0) {
           //切换查询图表类型
-          this.gasIndex = Number(item.index)+1;
+          console.log(item.index);
+          this.gasIndex = Number(item.index);
+          console.log(this.gasIndex);
           this.value = 'day';
           this.satisticValue = 'average'
         }
-        const gasName = this.menuListData[this.gasIndex-1].name;
+        const gasName = this.menuListData[this.gasIndex].name;
         //封装数据
         var param = {
           name: gasName,
@@ -185,9 +187,25 @@ export default {
           chartType: item.chartType,
           datetime: this.datetime,
         }
+        console.log(param);
         getStatisticData(param).then(res => {
           if (item.chartType===''){
-            param.chartType='line1';
+            const result = res.data;
+            //展示数据获取信息
+            for (const resultKey in result) {
+              const item = result[resultKey];
+              if (item.msg!=='') this.$message.error({message:item.msg,duration:2000});
+              //折线图和面积图
+              if (resultKey==='drawLineAndAreaData'){
+                this.drawGasLine1(item.data);
+                this.drawGasLine2(item.data);
+              }else if (resultKey==='xxx'){
+                //后续其他图
+              }
+            }
+
+
+          /*  param.chartType='line1';
             getStatisticData(param).then(res => {
               if (res.code===1) {
                 const dataList = res.data.dataList;
@@ -201,7 +219,7 @@ export default {
                 })
               }else {
                 this.$message.error({
-                  message:'为获取到数据',
+                  message:'未获取到数据',
                   duration:2000
                 })
               }
@@ -211,8 +229,6 @@ export default {
               if (res.code===1) {
                 const dataList = res.data.dataList;
                 const dateList = res.data.dateList;
-                console.log(dataList)
-                console.log(dateList)
                 //渲染图像
                 this.drawGasLine1({
                   dataList:dataList,
@@ -220,18 +236,16 @@ export default {
                 })
               }else {
                 this.$message.error({
-                  message:'为获取到数据',
+                  message:'未获取到数据',
                   duration:2000
                 })
               }
-            })
+            })*/
           }else if (item.chartType==='line1'){
             //基本折线图
             if (res.code===1) {
               const dataList = res.data.dataList;
               const dateList = res.data.dateList;
-              console.log(dataList)
-              console.log(dateList)
               //渲染图像
               this.drawGasLine1({
                 dataList:dataList,
@@ -239,7 +253,7 @@ export default {
               })
             }else {
               this.$message.error({
-                message:'为获取到数据',
+                message:'未获取到数据',
                 duration:2000
               })
             }
@@ -248,8 +262,6 @@ export default {
             if (res.code===1) {
               const dataList = res.data.dataList;
               const dateList = res.data.dateList;
-              console.log(dataList)
-              console.log(dateList)
               //渲染图像
               this.drawGasLine2({
                 dataList:dataList,
@@ -257,7 +269,7 @@ export default {
               })
             }else {
               this.$message.error({
-                message:'为获取到数据',
+                message:'未获取到数据',
                 duration:2000
               })
             }
@@ -332,7 +344,7 @@ export default {
           title: [
             {
               left: 'center',
-              text: `${this.menuListData[this.gasIndex-1].name}基本数据折线图`
+              text: `${this.menuListData[this.gasIndex].name}基本数据折线图`
             },
           ],
           tooltip: {
@@ -383,7 +395,7 @@ export default {
         },
         title: {
           left: 'center',
-          text: `${this.menuListData[this.gasIndex-1].name}面积图`
+          text: `${this.menuListData[this.gasIndex].name}面积图`
         },
         toolbox: {
           feature: {
