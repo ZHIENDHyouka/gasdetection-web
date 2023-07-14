@@ -461,6 +461,7 @@ export default {
     //     this.datePickerType==='datetimerange'
     //   }
     // },
+    //设置当前默认时间
     setNowMothRange() {
       this.datetime = [];
       const now = new Date().getTime();
