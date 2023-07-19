@@ -146,7 +146,7 @@
 </template>
 
 <script>
-import {closeConnection, sendInfo} from "@/utils/websocketUtil";
+import {closeConnection, inintWebSocket, sendInfo} from "@/utils/websocketUtil";
 import {
   getAlarmInfoData,
   getDeviceInfoData,
@@ -232,7 +232,7 @@ export default {
     this.username = window.localStorage.getItem("username");
     this.userId = window.localStorage.getItem("userId");
     this.userLevel = window.localStorage.getItem("userLevel");
-    // this.$store.state.websocket = inintWebSocket();
+    this.$store.state.websocket = inintWebSocket();
   },
   mounted() {
     this.$router.replace("/HomeCharts");
