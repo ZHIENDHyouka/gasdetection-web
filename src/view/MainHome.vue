@@ -4,7 +4,7 @@
       <el-header>
         <div style="float: left;display: inline">
           <el-menu :default-active="activeIndexHorizontal" class="el-menu-demo" mode="horizontal" router
-            active-text-color="rgb(110,0,0)">
+                   active-text-color="rgb(110,0,0)">
             <el-menu-item v-for="(item, index) in this.navigation" :key="index" :index="item.path">
               {{ item.name }}
             </el-menu-item>
@@ -17,12 +17,13 @@
             <el-dropdown-menu slot="dropdown">
               <el-dropdown-item command="2">设备管理</el-dropdown-item>
               <el-dropdown-item command="3">用户反馈</el-dropdown-item>
+              <el-dropdown-item command="4">气体阈值</el-dropdown-item>
               <el-dropdown-item command="1">退出</el-dropdown-item>
             </el-dropdown-menu>
           </el-dropdown>
           <span>{{ username }}</span>
           <i class="el-icon-message" style="margin-left: 30px;height: 30px;font-weight: 600"
-            @click="showAlarmInfoTable" />
+             @click="showAlarmInfoTable"/>
           <el-badge v-if="this.$store.state.alarmNumber > 0" :value="this.$store.state.alarmNumber" :max="99">
           </el-badge>
         </div>
@@ -32,8 +33,8 @@
 
     <el-dialog title="24小时报警数据" :visible.sync="showAlarmTable" :before-close="closeTable" width="70%">
       <el-table
-        :data="this.$store.state.alarmTableData.slice((this.currentPage - 1) * this.pageSize, this.pageSize * this.currentPage)"
-        :cell-style="columnStyle" :header-cell-style="headCellStyle" height="390px" :render-header="renderHeader">
+          :data="this.$store.state.alarmTableData.slice((this.currentPage - 1) * this.pageSize, this.pageSize * this.currentPage)"
+          :cell-style="columnStyle" :header-cell-style="headCellStyle" height="390px" :render-header="renderHeader">
         <el-table-column type="index" label="序号"></el-table-column>
         <el-table-column property="gasName" label="气体名称"></el-table-column>
         <el-table-column property="value" label="数值"></el-table-column>
@@ -42,8 +43,9 @@
         <el-table-column property="deviceId" label="记录设备编号"></el-table-column>
       </el-table>
       <el-pagination style="margin-left: 200px;margin-top: 20px" @size-change="handleSizeChange"
-        @current-change="handleCurrentChange" :current-page="currentPage" :page-sizes="[10, 50, 100, 500]" :page-size="5"
-        layout="total, sizes, prev, pager, next, jumper" :total="this.$store.state.alarmTableData.length">
+                     @current-change="handleCurrentChange" :current-page="currentPage" :page-sizes="[10, 50, 100, 500]"
+                     :page-size="5"
+                     layout="total, sizes, prev, pager, next, jumper" :total="this.$store.state.alarmTableData.length">
       </el-pagination>
     </el-dialog>
 
@@ -60,8 +62,8 @@
         <el-table-column label="操作" align="center">
           <template slot-scope="scope">
             <el-switch style="display: block" v-model="scope.row.deviceStatus" :active-value="1" :inactive-value="0"
-              active-color="#13ce66" inactive-color="#ff4949" active-text="开" inactive-text="关"
-              @change="changSwitchState($event, scope.row.id)">
+                       active-color="#13ce66" inactive-color="#ff4949" active-text="开" inactive-text="关"
+                       @change="changSwitchState($event, scope.row.id)">
             </el-switch>
           </template>
         </el-table-column>
@@ -93,7 +95,8 @@
         <el-table-column label="操作" align="center">
           <template slot-scope="scope">
             <div v-if="scope.row.status === 1">已解决</div>
-            <el-button type="primary" @click="solvingProblems(scope.row.id)" v-if="scope.row.status === 0">解决</el-button>
+            <el-button type="primary" @click="solvingProblems(scope.row.id)" v-if="scope.row.status === 0">解决
+            </el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -104,20 +107,91 @@
         <el-button type="primary" @click="detailsFeedbackDialogVisible = false">确 定</el-button>
       </span>
     </el-dialog>
-
+    <el-drawer
+        title="气体阈值"
+        :visible.sync="drawer"
+        :direction="direction"
+        :before-close="handleClose"
+        size="50%"
+    >
+      <el-table :data="gasCriticalList">
+        <el-table-column type="index" label="编号" width="150"></el-table-column>
+        <el-table-column property="name" label="气体名称" width="200"></el-table-column>
+        <el-table-column property="upperLimit" label="阈值上限"></el-table-column>
+        <el-table-column property="lowerLimit" label="阈值下限"></el-table-column>
+        <el-table-column
+            label="操作"
+            width="100">
+          <template slot-scope="scope">
+            <el-button @click="showUpdate(scope.row)" type="text" size="small">修改</el-button>
+          </template>
+        </el-table-column>
+      </el-table>
+    </el-drawer>
+    <el-dialog title="阈值修改"   :visible.sync="updateCriticalDialog" width="500px">
+      <el-form :model="updateCriticalForm" ref="criticalRuleForm" :rules="criticalRules">
+        <el-form-item label="阈值下限:" label-width="100px"  prop="lowerLimit">
+          <el-input v-model="updateCriticalForm.lowerLimit" style="width: 220px"></el-input>
+        </el-form-item>
+        <el-form-item label="阈值上限:" label-width="100px" prop="upperLimit">
+          <el-input v-model="updateCriticalForm.upperLimit" style="width: 220px"></el-input>
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="updateCriticalDialog = false">取 消</el-button>
+        <el-button type="primary" @click="updateCritical('criticalRuleForm')">确 定</el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
 <script>
 import {closeConnection, sendInfo} from "@/utils/websocketUtil";
-import { getAlarmInfoData, getDeviceInfoData, updateDeviceState, submitFeedbackInfo, getFeedbackInfoData, solvingProblems } from "@/utils/api";
+import {
+  getAlarmInfoData,
+  getDeviceInfoData,
+  updateDeviceState,
+  submitFeedbackInfo,
+  getFeedbackInfoData,
+  solvingProblems, getGasCriticalInfo, updateCriticalValue,
+} from "@/utils/api";
 
 export default {
   name: "MainHome",
 
   data() {
     return {
-      navigation:[],
+      criticalRules:{
+        lowerLimit:[
+          { required: true, message: '请输入数据', trigger: 'blur' },
+          {
+            validator: (rule,value,callback)=>{
+              if (Number(value)>=this.updateCriticalForm.upperLimit)
+                callback(new Error('下限不能大于等于上限'));
+              else
+                callback();
+            }, trigger: 'blur',required: true,
+          },
+        ],
+        upperLimit:[
+          { required: true, message: '请输入数据', trigger: 'blur' },
+          {   validator: (rule,value,callback)=>{
+              if (Number(value)<=this.updateCriticalForm.lowerLimit)
+                callback(new Error('上限不能小于等于下限'));
+              else
+                callback();
+            },
+            required: true, trigger: 'blur' },
+        ]
+      },
+      updateCriticalForm:{
+        lowerLimit:'',
+        upperLimit:'',
+        id:0,
+      },
+      updateCriticalDialog:false,
+      drawer: false,
+      navigation: [],
       showAlarmTable: false,
       activeIndexHorizontal: this.$router.options.routes[1].children[0].path,
       username: '',
@@ -137,14 +211,17 @@ export default {
       },
       rules: {
         desc: [
-          { required: true, message: '请输入所要反馈的问题', trigger: 'blur' }
+          {required: true, message: '请输入所要反馈的问题', trigger: 'blur'}
         ]
       },
 
       feedbackData: [],
       dialogUserFeedbackTableVisible: false,
       detailsFeedbackDialogVisible: false,
-      feedbackIssues: ''
+      feedbackIssues: '',
+      direction: 'rtl',
+      gasCriticalList: [],
+
     }
   },
   created() {
@@ -161,16 +238,67 @@ export default {
     this.$router.replace("/HomeCharts");
     this.getRealTimeAlarmNumber();
     this.menuBarJudgment();
+    this.getGasCriticalInfo();
   },
   methods: {
-    menuBarJudgment(){
-      if (this.userLevel==2){
-        this.navigation =this.$router.options.routes[1].children
-        this.navigation.splice(2,1)
-      }else {
-        this.navigation=this.$router.options.routes[1].children;
+    updateCritical(formName){
+      this.$refs[formName].validate((valid) => {
+        console.log(valid)
+        if (valid) {
+          updateCriticalValue(this.updateCriticalForm).then(res=>{
+            const code =res.code;
+            const msg = res.msg
+            if (code===1){
+              this.$message.success({
+                message:msg,
+                duration:1500,
+              })
+              this.getGasCriticalInfo();
+              this.updateCriticalDialog=false;
+            }else if (code===0) {
+              this.$message.error({
+                message: msg,
+                duration: 1500,
+              })
+            }
+          });
+        } else {
+          return false;
+        }
+      });
+
+    },
+    showUpdate(row){
+      this.updateCriticalForm.lowerLimit=row.lowerLimit.split("  ")[0];
+      this.updateCriticalForm.upperLimit=row.upperLimit.split("  ")[0];
+      this.updateCriticalForm.id=row.id
+      this.updateCriticalDialog=true;
+    },
+    getGasCriticalInfo() {
+      getGasCriticalInfo().then(res => {
+        const list = res.data;
+        console.log(list);
+        if (list && list.length > 0) {
+          for (const listElement of list) {
+            if (listElement.name==='湿度'){
+              listElement.upperLimit *=100;
+              listElement.lowerLimit *=100;
+            }
+            listElement.lowerLimit+="  "+listElement.symbol;
+            listElement.upperLimit+="  "+listElement.symbol;
+          }
+          this.gasCriticalList = list;
+        }
+      })
+    },
+    menuBarJudgment() {
+      if (this.userLevel == 2) {
+        this.navigation = this.$router.options.routes[1].children
+        this.navigation.splice(2, 1)
+      } else {
+        this.navigation = this.$router.options.routes[1].children;
       }
-      
+
     },
     getRealTimeAlarmNumber() {
       if (this.$store.state.websocket) {
@@ -212,7 +340,7 @@ export default {
     handleCurrentChange(val) {
       this.currentPage = val;
     },
-    renderHeader(h, { column }) {
+    renderHeader(h, {column}) {
       let realWidth = 0;
       let span = document.createElement('span');
 
@@ -258,6 +386,9 @@ export default {
           })
           this.dialogUserFeedbackTableVisible = true;
         }
+      } else if ('4' === command) {
+        console.log(1);
+        this.drawer = true;
       }
     },
     //控制设备开关的方法
@@ -317,8 +448,10 @@ export default {
           this.feedbackData = res.data
         })
       })
+    },
+    handleClose() {
+      this.drawer = false;
     }
-
   }
 }
 </script>
@@ -365,4 +498,5 @@ export default {
   height: 60px;
   margin-left: -100px;
 }
+
 </style>

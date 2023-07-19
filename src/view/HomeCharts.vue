@@ -68,7 +68,7 @@ export default {
             }else if (code===2){
               this.$store.state.alarmNumber=Number(data.alarmNumber);
             }else if (code===3){
-              console.log(data);
+              // console.log(data);
               if (data.data.length!==0) {
                 this.$store.state.alarmTableData=data.data;
               }

@@ -211,3 +211,21 @@ export  function  getStatisticData(param){
         data:param
     })
 }
+
+//获取设备阈值信息
+export function getGasCriticalInfo(){
+    return axios({
+        url:'alarm/queryAllAlarmCriticalInfo',
+        method:'get',
+    })
+}
+
+//更新阈值信息
+export function updateCriticalValue(data){
+    return axios({
+        url:`alarm/updateGasAlarmCritical`,
+        method:'post',
+        data
+    })
+
+}

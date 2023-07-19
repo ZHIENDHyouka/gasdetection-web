@@ -177,14 +177,12 @@
                         gas: this.queryGas,
                         device: this.queryDevice
                     };
-                    console.log(condition)
                     getConditionData(condition).then(res => {
                         this.tableData = res.data.dataList;
                         this.tableHead = res.data.headList;
                         if (this.tableData.length === 0) {
                             this.$message.warning("暂无数据!");
                         }
-                        console.log(res);
                         console.log("数据获取!");
                     })
                 }
@@ -253,7 +251,16 @@
 		border-top: 1px solid #eae6e6;
 		margin-left: 50px;
 		width: 1350px;
+    display: flex;
+    flex-direction: column;
+    height: 475px;
 	}
+  .tablePart >>> .el-table__header-wrapper {
+    height: 90px;
+  }
+  .tablePart >>> .el-table__body-wrapper {
+    height: calc(100% - 90px) !important;
+  }
 	
 	.el-pagination {
 		width: 80%;
