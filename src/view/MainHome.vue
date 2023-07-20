@@ -17,7 +17,7 @@
             <el-dropdown-menu slot="dropdown">
               <el-dropdown-item command="2">设备管理</el-dropdown-item>
               <el-dropdown-item command="3">用户反馈</el-dropdown-item>
-              <el-dropdown-item command="4">气体阈值</el-dropdown-item>
+              <el-dropdown-item command="4" v-if="this.userLevel==1">气体阈值</el-dropdown-item>
               <el-dropdown-item command="1">退出</el-dropdown-item>
             </el-dropdown-menu>
           </el-dropdown>
