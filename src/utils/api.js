@@ -102,6 +102,7 @@ export function exportedData(number,gas,data) {
     return axios({
         url:'gas/download',
         method:'post',
+        responseType: 'blob',
         data:{
             number:number,
             gas:gas,

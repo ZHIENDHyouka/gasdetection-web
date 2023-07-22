@@ -47,6 +47,12 @@ service.interceptors.response.use(function (res) {
         }
     }
     if (res.data.message) Message.success({message:res.data.message});
+    console.log(res.headers['content-disposition']);
+    if (res.headers['content-disposition'])
+        return {
+            data:res.data,
+            fileName:res.headers['content-disposition'].split("=")[1],
+        }
     return res.data;
 }, function (error) {
     loading.close();

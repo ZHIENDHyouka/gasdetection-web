@@ -161,13 +161,12 @@
             },
             getAllTemperatureList() {
                 getAllTemperatureData().then(res => {
-                    console.log(res.data);
                     this.tableData = res.data.dataList;
                     this.tableHead = res.data.headList;
                     if (this.tableData.length === 0) {
                         this.$message.warning("暂无数据!");
                     }
-                    console.log("数据获取!");
+
                 })
             },
             getConditionTableDate() {
@@ -183,7 +182,7 @@
                         if (this.tableData.length === 0) {
                             this.$message.warning("暂无数据!");
                         }
-                        console.log("数据获取!");
+
                     })
                 }
             },
@@ -200,8 +199,6 @@
                     inputPattern: /^\+?[1-9][0-9]*$/,
                     inputErrorMessage: '数据格式不正确'
                 }).then(({value}) => {
-                    console.log(value,this.queryGas, this.tableData.length);
-                    console.log(this.tableData)
                     let total = this.tableData.length
                     if (value > total) {
                         this.$message({
@@ -211,18 +208,15 @@
                     }
                     //导出方法
                     exportedData(value, this.queryGas, this.tableData).then(res => {
-                        console.log(res);
-                        if (res.code > 0) {
-                            this.$message({
-                                type: 'success',
-                                message: '导出成功!'
-                            });
-                        }else {
-                            this.$message({
-                                type: 'error',
-                                message: '导出失败请联系管理员'
-                            });
-                        }
+                      const blob = new Blob([res.data], {
+                        type: 'application/octet-stream'
+                      })
+                      const a = document.createElement('a');
+                      const url = window.URL.createObjectURL(blob);
+                      a.href = url
+                      a.download = res.fileName;
+                      a.click()
+                      window.URL.revokeObjectURL(url)
                     })
 
 
