@@ -98,11 +98,12 @@ export default {
           login(this.loginForm).then(res => {
             const message = res.msg;
             const code = res.code;
-            const username  = res.data.username;
-            const userId=res.data.managerId;
-            const userLevel=res.data.managerLevel;
+
             const flag = this.returnInfo(message, code);
             if (flag) {
+              const username  = res.data.username;
+              const userId=res.data.managerId;
+              const userLevel=res.data.managerLevel;
               this.clearLoginForm();
               //页面跳转
               // this.$store.state.username=username;
