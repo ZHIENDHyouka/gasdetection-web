@@ -96,7 +96,7 @@ export default {
       }
     },
     dynamicAlarmInfo(date, value) {
-      if (this.drawLine) {
+      if (this.drawLine&&this.drawLine.getOption()) {
         //更新数据
         const xData = this.drawLine.getOption().xAxis[0].data;
         const yData = this.drawLine.getOption().series[0].data;
@@ -194,9 +194,27 @@ export default {
         if (res.code === 1) {
           this.drawAlarmInfoLine(res.data.dateList, res.data.valueList);
         } else if (res.code === 0) {
-          this.$message.warning(res.msg);
+          // this.$message.warning(res.msg);
+          const dateList =[];
+          const valueList = [];
+          let now = new Date().getTime();
+          for (let i = 0; i <7; i++) {
+            dateList.push(this.getDataTimeFormat(now));
+            now-=(1000*60);
+            valueList.push(0);
+          }
+
+          this.drawAlarmInfoLine(dateList,valueList);
         }
       })
+    },
+    getDataTimeFormat(n) {
+      const now = new Date(n)
+          // y = now.getFullYear(),
+          // m = now.getMonth() + 1,
+          // d = now.getDate();
+      // return y + "-" + (m < 10 ? "0" + m : m) + "-" + (d < 10 ? "0" + d : d) + " " + now.toTimeString().substr(0, 8);
+      return now.toTimeString().substr(0, 8);
     },
     getDeviceData() {
       getDeviceRunNumber().then((res) => {

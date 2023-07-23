@@ -7,7 +7,7 @@
       <amap-tool-bar/>
       <amap-map-type/>
       <amap-scale/>
-      <amap-marker :position="center"/>
+<!--      <amap-marker :position="center"/>-->
       <amap-marker v-for="(ele,index) of this.markerPostion" :key="index" :position="ele"
                    clickable @click="onMarkerClick(ele)"></amap-marker>
       <!--          :visible="!!markerInfo"-->
