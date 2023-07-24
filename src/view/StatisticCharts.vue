@@ -203,44 +203,6 @@ export default {
                 //后续其他图
               }
             }
-
-
-          /*  param.chartType='line1';
-            getStatisticData(param).then(res => {
-              if (res.code===1) {
-                const dataList = res.data.dataList;
-                const dateList = res.data.dateList;
-                console.log(dataList)
-                console.log(dateList)
-                //渲染图像
-                this.drawGasLine1({
-                  dataList:dataList,
-                  dateList:dateList,
-                })
-              }else {
-                this.$message.error({
-                  message:'未获取到数据',
-                  duration:2000
-                })
-              }
-            })
-            param.chartType='line2'
-            getStatisticData(param).then(res => {
-              if (res.code===1) {
-                const dataList = res.data.dataList;
-                const dateList = res.data.dateList;
-                //渲染图像
-                this.drawGasLine1({
-                  dataList:dataList,
-                  dateList:dateList,
-                })
-              }else {
-                this.$message.error({
-                  message:'未获取到数据',
-                  duration:2000
-                })
-              }
-            })*/
           }else if (item.chartType==='line1'){
             //基本折线图
             if (res.code===1) {
@@ -367,6 +329,10 @@ export default {
               start: 0,
               end: 10,
             },
+            {
+              start: 0,
+              end: 10
+            }
           ],
           grid: [
             {
@@ -465,6 +431,7 @@ export default {
     setNowMothRange() {
       this.datetime = [];
       const now = new Date().getTime();
+      // this.datetime.push(this.getDataTimeFormat(now - 1000 * 60 * 60 * 24 * 2));
       this.datetime.push(this.getDataTimeFormat(now - 1000 * 60 * 60 * 24 * 30));
       this.datetime.push(this.getDataTimeFormat(now));
     },

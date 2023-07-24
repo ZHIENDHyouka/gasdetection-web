@@ -5,6 +5,7 @@ export function inintWebSocket() {
     if ('WebSocket' in window) {
         //连接WebSocket节点
         websocket = new WebSocket(`ws://127.0.0.1:8083/webSocket`);
+        // websocket = new WebSocket(`ws://172.20.10.3:8083/webSocket`);
         console.log(websocket);
         // websocket = new WebSocket(`ws://${host}/socket/webSocket/${name}`);
     } else {

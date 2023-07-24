@@ -352,7 +352,14 @@ export default {
           type: 'line',
           smooth: true,
           seriesLayoutBy: 'row',
-          emphasis: {focus: 'series'}
+          emphasis: {
+            focus: 'series',
+
+          },
+          // label: {
+          //   show: true,
+          //   // formatter: "{d|{d}%} \n {b|{b}}",
+          // }
         })
       }
       this.drawCharts1.setOption(option);
